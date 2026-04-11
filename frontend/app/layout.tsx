@@ -1,3 +1,9 @@
+/*
+ * Created: 2026-04-11
+ * Updated: 2026-04-11
+ * Purpose: Root Next.js layout that wraps pages with AppShell.
+ * Owner: Quang Trung
+ */
 import "./globals.css";
 import type { ReactNode } from "react";
 import { AppShell } from "../src/components/layout/AppShell";

@@ -1,5 +1,12 @@
 "use client";
 
+/*
+ * Created: 2026-04-11
+ * Updated: 2026-04-11
+ * Purpose: Sidebar navigation for top-level module routes.
+ * Owner: Quang Trung
+ */
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -8,6 +15,7 @@ type SidebarNavProps = {
 };
 
 const NAV_ITEMS = [
+  // Central route registry for shell navigation to avoid hard-coded links across pages.
   { href: "/", label: "Overview" },
   { href: "/admin", label: "Admin" },
   { href: "/doctor", label: "Doctor" },
@@ -32,6 +40,7 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
   return (
     <nav style={{ display: "grid", gap: ".35rem" }}>
       {NAV_ITEMS.map((item) => {
+        // Highlight current route to preserve orientation across role modules.
         const active = pathname === item.href;
         return (
           <Link

@@ -1,3 +1,9 @@
+/*
+ * Created: 2026-04-11
+ * Updated: 2026-04-11
+ * Purpose: Role keys and labels used across frontend routes.
+ * Owner: Quang Trung
+ */
 export const ROLE_KEYS = [
   "ADMIN",
   "DOCTOR",

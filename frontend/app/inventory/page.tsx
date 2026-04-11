@@ -1,3 +1,9 @@
+/*
+ * Created: 2026-04-11
+ * Updated: 2026-04-11
+ * Purpose: Route placeholder page scaffold for module navigation.
+ * Owner: Quang Trung
+ */
 import { RoutePlaceholder } from "../../src/components/layout/RoutePlaceholder";
 
 export default function Page() {

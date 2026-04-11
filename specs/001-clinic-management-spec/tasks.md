@@ -27,7 +27,7 @@ Google Test is not scheduled because no native/C++ modules are in scope for the 
 
 - [X] T005 Define shared role and status constants in `frontend/src/utils/roles.ts` and `frontend/src/utils/statuses.ts`
 - [X] T006 [P] Build shared responsive shell and navigation framework in `frontend/src/components/layout/` for Android, iOS, and Windows targets
-- [ ] T007 [P] Build shared form, loading, error, and empty-state components in `frontend/src/components/ui/`
+- [X] T007 [P] Build shared form, loading, error, and empty-state components in `frontend/src/components/ui/`
 - [ ] T008 Define free-database-compatible ORM base configuration in `backend/src/database/data-source.ts`
 - [ ] T009 [P] Create database-agnostic repository interfaces in `backend/src/services/contracts/`
 - [ ] T010 [P] Add initial TypeORM entities for `User`, `Patient`, `Doctor`, and `DoctorSchedule` in `backend/src/models/`
