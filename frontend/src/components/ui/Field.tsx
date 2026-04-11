@@ -31,12 +31,13 @@ export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       style={{
+        boxSizing: "border-box",
         width: "100%",
         borderRadius: 10,
         border: "1px solid var(--border)",
         padding: ".65rem .8rem",
         font: "inherit",
-        background: "white",
+        background: "var(--panel)",
       }}
     />
   );

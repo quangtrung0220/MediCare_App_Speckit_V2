@@ -26,7 +26,7 @@
 | app/prescriptions/page.tsx | Page | renders RoutePlaceholder | src/components/layout/RoutePlaceholder.tsx |
 | app/receptionist/page.tsx | Page | renders RoutePlaceholder | src/components/layout/RoutePlaceholder.tsx |
 | app/reports/page.tsx | Page | renders RoutePlaceholder | src/components/layout/RoutePlaceholder.tsx |
-| src/components/layout/AppShell.tsx | AppShell | uses useState; renders SidebarNav and children | src/components/layout/SidebarNav.tsx |
+| src/components/layout/AppShell.tsx | AppShell | renders static sidebar plus route children workspace | src/components/layout/SidebarNav.tsx |
 | src/components/layout/SidebarNav.tsx | SidebarNav | uses usePathname; maps NAV_ITEMS; renders Link list | next/navigation, next/link |
 | src/components/layout/RoutePlaceholder.tsx | RoutePlaceholder | renders title + description block | internal only |
 | src/components/ui/Button.tsx | Button | resolves variant styles and renders button | internal only |

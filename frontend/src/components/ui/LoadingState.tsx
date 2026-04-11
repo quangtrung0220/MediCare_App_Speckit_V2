@@ -10,7 +10,7 @@ type LoadingStateProps = {
 
 export function LoadingState({ label = "Loading..." }: LoadingStateProps) {
   return (
-    <div className="card" aria-busy="true">
+    <div className="card" aria-busy="true" role="status" aria-live="polite">
       <p style={{ margin: 0, fontWeight: 600 }}>{label}</p>
     </div>
   );

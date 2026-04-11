@@ -4,7 +4,7 @@
  * Purpose: Landing page placeholder for the clinic workspace.
  * Owner: Quang Trung
  */
-import { RoutePlaceholder } from "../src/components/layout/RoutePlaceholder";
+import { RoutePlaceholder } from "@/components/layout/RoutePlaceholder";
 
 export default function HomePage() {
   return (

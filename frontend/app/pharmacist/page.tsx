@@ -4,9 +4,9 @@
  * Purpose: Route placeholder page scaffold for module navigation.
  * Owner: Quang Trung
  */
-import { RoutePlaceholder } from "../../src/components/layout/RoutePlaceholder";
+import { RoutePlaceholder } from "@/components/layout/RoutePlaceholder";
 
-export default function Page() {
+export default function PharmacistPage() {
   return (
     <RoutePlaceholder
       title="Pharmacist"

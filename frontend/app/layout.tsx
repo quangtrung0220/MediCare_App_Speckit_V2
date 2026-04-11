@@ -6,11 +6,13 @@
  */
 import "./globals.css";
 import type { ReactNode } from "react";
-import { AppShell } from "../src/components/layout/AppShell";
+import type { Metadata } from "next";
+import { AppShell } from "@/components/layout/AppShell";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "MediCare App",
   description: "Clinic management frontend shell",
+  referrer: "no-referrer",
 };
 
 type RootLayoutProps = {

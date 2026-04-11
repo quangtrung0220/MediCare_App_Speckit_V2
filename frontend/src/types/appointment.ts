@@ -4,7 +4,9 @@
  * Purpose: Shared appointment data types.
  * Owner: Quang Trung
  */
-export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "NO_SHOW";
+import { APPOINTMENT_STATUSES } from "@/utils/statuses";
+
+export type AppointmentStatus = (typeof APPOINTMENT_STATUSES)[number];
 
 export type AppointmentSummary = {
   id: string;
