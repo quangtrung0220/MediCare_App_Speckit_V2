@@ -1,3 +1,9 @@
+/*
+ * Created: 2026-04-11
+ * Updated: 2026-04-11
+ * Purpose: Status constants and labels used in UI modules.
+ * Owner: Quang Trung
+ */
 export const APPOINTMENT_STATUSES = [
   "SCHEDULED",
   "COMPLETED",

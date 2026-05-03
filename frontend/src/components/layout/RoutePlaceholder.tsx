@@ -1,3 +1,9 @@
+/*
+ * Created: 2026-04-11
+ * Updated: 2026-04-11
+ * Purpose: Reusable placeholder content block for scaffolded routes.
+ * Owner: Quang Trung
+ */
 type RoutePlaceholderProps = {
   title: string;
   description: string;
