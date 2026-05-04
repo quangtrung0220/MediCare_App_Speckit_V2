@@ -9,6 +9,7 @@
 
 import type { ReactNode } from "react";
 import { SidebarNav } from "./SidebarNav";
+import styles from "./AppShell.module.css";
 
 type AppShellProps = {
   children: ReactNode;
@@ -16,31 +17,16 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "row" }}>
-      <aside
-        style={{
-          flex: "0 0 280px",
-          borderRight: "1px solid var(--border)",
-          background: "var(--panel)",
-          padding: "1rem",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          overflowY: "auto",
-          zIndex: 12,
-        }}
-      >
-        <div style={{ fontWeight: 700, color: "var(--brand)", marginBottom: "1rem" }}>MediCare</div>
+    <div className={styles.container}>
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}>MediCare</div>
         <SidebarNav />
       </aside>
-      <main style={{ flex: 1, padding: "1rem 1.2rem", overflow: "auto" }}>
-        <div
-          className="card"
-          style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", marginBottom: "1rem" }}
-        >
+      <main className={styles.main}>
+        <div className={`card ${styles.workspaceHeader}`}>
           <div>
-            <div style={{ fontWeight: 600 }}>Clinic Workspace</div>
-            <div className="muted" style={{ fontSize: ".9rem" }}>
+            <div className={styles.workspaceTitle}>Clinic Workspace</div>
+            <div className={`muted ${styles.workspaceSubtitle}`}>
               Shared shell for Android, iOS, and Windows experiences
             </div>
           </div>

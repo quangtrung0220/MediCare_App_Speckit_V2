@@ -1,0 +1,28 @@
+/* Sidebar Navigation Styles */
+
+.nav {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.navLink {
+  text-decoration: none;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: inherit;
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.navLink:hover {
+  background: var(--border);
+}
+
+.navLink.active {
+  background: var(--text);
+  color: #134e4a;
+  font-weight: 600;
+}

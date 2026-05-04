@@ -5,43 +5,19 @@
  * Owner: Quang Trung
  */
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import type { CSSProperties } from "react";
+import styles from "./Button.module.css";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost";
   children: ReactNode;
 };
 
-const VARIANT_STYLES: Record<NonNullable<ButtonProps["variant"]>, CSSProperties> = {
-  primary: {
-    background: "var(--brand)",
-    color: "white",
-    border: "1px solid var(--brand)",
-  },
-  secondary: {
-    background: "var(--panel)",
-    color: "var(--text)",
-    border: "1px solid var(--border)",
-  },
-  ghost: {
-    background: "transparent",
-    color: "var(--text)",
-    border: "1px solid transparent",
-  },
-};
-
-export function Button({ variant = "primary", children, style, ...props }: ButtonProps) {
+export function Button({ variant = "primary", children, className, ...props }: ButtonProps) {
+  const variantClass = variant === "primary" ? styles.primary : variant === "secondary" ? styles.secondary : styles.ghost;
   return (
     <button
       {...props}
-      style={{
-        borderRadius: 10,
-        padding: ".6rem .9rem",
-        fontWeight: 600,
-        cursor: "pointer",
-        ...VARIANT_STYLES[variant],
-        ...style,
-      }}
+      className={`${styles.button} ${variantClass} ${className || ""}`}
     >
       {children}
     </button>

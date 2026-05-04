@@ -1,0 +1,39 @@
+/* Button Styles */
+
+.button {
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primary {
+  background: var(--brand);
+  color: white;
+  border: 1px solid var(--brand);
+}
+
+.primary:hover {
+  opacity: 0.9;
+}
+
+.secondary {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.secondary:hover {
+  background: var(--border);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid transparent;
+}
+
+.ghost:hover {
+  background: var(--bg);
+}

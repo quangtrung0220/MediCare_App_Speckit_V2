@@ -9,9 +9,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import styles from "./SidebarNav.module.css";
 
 type SidebarNavProps = {
-  onNavigate?: () => void;
+  onNavigateAction?: () => void;
 };
 
 const NAV_ITEMS = [
@@ -34,11 +35,11 @@ const NAV_ITEMS = [
   { href: "/audit", label: "Audit" },
 ];
 
-export function SidebarNav({ onNavigate }: SidebarNavProps) {
+export function SidebarNav({ onNavigateAction }: SidebarNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Primary navigation" style={{ display: "grid", gap: ".35rem" }}>
+    <nav aria-label="Primary navigation" className={styles.nav}>
       {NAV_ITEMS.map((item) => {
         // Highlight current route to preserve orientation across role modules.
         const active = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -46,16 +47,8 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
           <Link
             key={item.href}
             href={item.href}
-            onClick={onNavigate}
-            style={{
-              textDecoration: "none",
-              border: "1px solid var(--border)",
-              background: active ? "var(--text)" : "var(--panel)",
-              color: active ? "#134e4a" : "inherit",
-              borderRadius: 10,
-              padding: ".55rem .75rem",
-              fontWeight: active ? 600 : 500,
-            }}
+            onClick={onNavigateAction}
+            className={`${styles.navLink} ${active ? styles.active : ""}`}
           >
             {item.label}
           </Link>

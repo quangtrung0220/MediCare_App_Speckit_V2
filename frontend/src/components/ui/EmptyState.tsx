@@ -5,6 +5,7 @@
  * Owner: Quang Trung
  */
 import type { ReactNode } from "react";
+import styles from "./EmptyState.module.css";
 
 type EmptyStateProps = {
   title: string;
@@ -14,10 +15,10 @@ type EmptyStateProps = {
 
 export function EmptyState({ title, description, action }: EmptyStateProps) {
   return (
-    <div className="card" style={{ textAlign: "center", padding: "1.5rem" }}>
-      <h3 style={{ marginTop: 0 }}>{title}</h3>
+    <div className={`card ${styles.container}`}>
+      <h3 className={styles.title}>{title}</h3>
       <p className="muted">{description}</p>
-      {action ? <div style={{ marginTop: "1rem" }}>{action}</div> : null}
+      {action ? <div className={styles.action}>{action}</div> : null}
     </div>
   );
 }
