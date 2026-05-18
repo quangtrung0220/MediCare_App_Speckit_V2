@@ -6,6 +6,7 @@
  */
 "use client";
 
+import { useRouter } from "next/navigation";
 import { usePatients } from "@/hooks/usePatients";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -14,6 +15,7 @@ import PATIENTS_PAGE from "@/constants/patients";
 import styles from "./page.module.css";
 
 export default function PatientsPage() {
+  const router = useRouter();
   const { patients, isLoading, error, total } = usePatients();
 
   return (
@@ -48,7 +50,11 @@ export default function PatientsPage() {
       {!isLoading && !error && patients.length > 0 && (
         <div className={styles.patientList}>
           {patients.map((patient) => (
-            <PatientListRow key={patient.id} patient={patient} />
+            <PatientListRow
+              key={patient.id}
+              patient={patient}
+              onClick={(id) => router.push(`/patients/${id}`)}
+            />
           ))}
         </div>
       )}

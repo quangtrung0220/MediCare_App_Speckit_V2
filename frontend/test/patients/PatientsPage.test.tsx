@@ -1,11 +1,19 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import PatientsPage from "../../app/patients/page";
 import { usePatients } from "@/hooks/usePatients";
 import { renderWithProviders } from "../utils/renderWithProviders";
 import { buildPatients } from "../utils/testData";
 
+const pushMock = jest.fn();
+
 jest.mock("@/hooks/usePatients", () => ({
   usePatients: jest.fn(),
+}));
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: pushMock,
+  }),
 }));
 
 const mockedUsePatients = jest.mocked(usePatients);
@@ -13,6 +21,7 @@ const mockedUsePatients = jest.mocked(usePatients);
 describe("PatientsPage", () => {
   beforeEach(() => {
     mockedUsePatients.mockReset();
+    pushMock.mockReset();
   });
 
   it("shows the loading state", () => {
@@ -59,5 +68,22 @@ describe("PatientsPage", () => {
     expect(screen.getByText("Trần Thị B")).toBeInTheDocument();
     expect(screen.getByText("Lần khám cuối: 2026-04-28")).toBeInTheDocument();
     expect(screen.getByText("Chưa khám")).toBeInTheDocument();
+  });
+
+  it("navigates to patient details when a row is clicked", () => {
+    const patients = buildPatients();
+
+    mockedUsePatients.mockReturnValue({
+      patients,
+      isLoading: false,
+      error: null,
+      total: patients.length,
+    });
+
+    renderWithProviders(<PatientsPage />);
+
+    fireEvent.click(screen.getAllByRole("button")[0]);
+
+    expect(pushMock).toHaveBeenCalledWith("/patients/PAT-001");
   });
 });
