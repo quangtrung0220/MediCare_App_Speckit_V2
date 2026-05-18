@@ -5,6 +5,7 @@
  * Owner: Quang Trung
  */
 import type { InputHTMLAttributes, ReactNode } from "react";
+import styles from "./Field.module.css";
 
 type FieldProps = {
   label: string;
@@ -16,12 +17,12 @@ type FieldProps = {
 export function Field({ label, helperText, error, children }: FieldProps) {
   return (
     // Wrap input and messages in one label block so click/focus behavior stays predictable.
-    <label style={{ display: "grid", gap: ".35rem" }}>
-      <span style={{ fontWeight: 600 }}>{label}</span>
+    <label className={styles.label}>
+      <span className={styles.labelText}>{label}</span>
       {children}
       {/* Helper text shows guidance; error text shows validation feedback when present. */}
-      {helperText ? <span className="muted" style={{ fontSize: ".85rem" }}>{helperText}</span> : null}
-      {error ? <span style={{ fontSize: ".85rem", color: "#b42318" }}>{error}</span> : null}
+      {helperText ? <span className={`muted ${styles.helperText}`}>{helperText}</span> : null}
+      {error ? <span className={styles.errorText}>{error}</span> : null}
     </label>
   );
 }
@@ -30,15 +31,7 @@ export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      style={{
-        boxSizing: "border-box",
-        width: "100%",
-        borderRadius: 10,
-        border: "1px solid var(--border)",
-        padding: ".65rem .8rem",
-        font: "inherit",
-        background: "var(--panel)",
-      }}
+      className={styles.textInput}
     />
   );
 }

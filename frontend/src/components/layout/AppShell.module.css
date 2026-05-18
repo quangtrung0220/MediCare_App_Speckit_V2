@@ -1,0 +1,46 @@
+/* AppShell Layout Styles */
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+}
+
+.sidebar {
+  flex: 0 0 280px;
+  border-right: 1px solid var(--border);
+  background: var(--panel);
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 12;
+}
+
+.brand {
+  font-weight: 700;
+  color: var(--brand);
+  margin-bottom: 1rem;
+}
+
+.main {
+  flex: 1;
+  padding: 1rem 1.2rem;
+  overflow: auto;
+}
+
+.workspaceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+}
+
+.workspaceTitle {
+  font-weight: 600;
+}
+
+.workspaceSubtitle {
+  font-size: 0.9rem;
+}

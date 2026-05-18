@@ -4,6 +4,8 @@
  * Purpose: Shared loading-state display component.
  * Owner: Quang Trung
  */
+import styles from "./LoadingState.module.css";
+
 type LoadingStateProps = {
   label?: string;
 };
@@ -11,7 +13,7 @@ type LoadingStateProps = {
 export function LoadingState({ label = "Loading..." }: LoadingStateProps) {
   return (
     <div className="card" aria-busy="true" role="status" aria-live="polite">
-      <p style={{ margin: 0, fontWeight: 600 }}>{label}</p>
+      <p className={styles.loadingText}>{label}</p>
     </div>
   );
 }

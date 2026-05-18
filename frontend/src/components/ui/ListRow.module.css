@@ -1,0 +1,36 @@
+/* List Row Styles */
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding: 0.8rem 0;
+  cursor: default;
+}
+
+.row.interactive {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.row.interactive:hover {
+  background-color: var(--bg);
+}
+
+.rowContent {
+  flex: 1;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.description {
+  font-size: 0.9rem;
+}
+
+.meta {
+  flex-shrink: 0;
+}

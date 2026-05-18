@@ -5,30 +5,52 @@
  * Owner: Quang Trung
  */
 import type { ReactNode } from "react";
+import styles from "./ListRow.module.css";
 
 type ListRowProps = {
   title: string;
   description?: string;
   meta?: ReactNode;
+  onClick?: () => void;
+  className?: string;
 };
 
-export function ListRow({ title, description, meta }: ListRowProps) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        gap: "1rem",
-        alignItems: "center",
-        borderBottom: "1px solid var(--border)",
-        padding: ".8rem 0",
-      }}
-    >
-      <div>
-        <div style={{ fontWeight: 600 }}>{title}</div>
-        {description ? <div className="muted" style={{ fontSize: ".9rem" }}>{description}</div> : null}
+export function ListRow({ title, description, meta, onClick, className }: ListRowProps) {
+  const interactive = typeof onClick === "function";
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!interactive) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
+  if (interactive) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        onClick={onClick}
+        className={`${styles.row} ${styles.interactive} ${className || ""}`}
+      >
+        <div className={styles.rowContent}>
+          <div className={styles.title}>{title}</div>
+          {description ? <div className={`muted ${styles.description}`}>{description}</div> : null}
+        </div>
+        {meta ? <div className={styles.meta}>{meta}</div> : null}
       </div>
-      {meta ? <div>{meta}</div> : null}
+    );
+  }
+
+  return (
+    <div className={`${styles.row} ${className || ""}`}>
+      <div className={styles.rowContent}>
+        <div className={styles.title}>{title}</div>
+        {description ? <div className={`muted ${styles.description}`}>{description}</div> : null}
+      </div>
+      {meta ? <div className={styles.meta}>{meta}</div> : null}
     </div>
   );
 }

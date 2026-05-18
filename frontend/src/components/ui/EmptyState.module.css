@@ -1,0 +1,14 @@
+/* Empty State Styles */
+
+.container {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.title {
+  margin-top: 0;
+}
+
+.action {
+  margin-top: 1rem;
+}

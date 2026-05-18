@@ -1,0 +1,42 @@
+import { render, screen } from "@testing-library/react";
+import PatientsPage from "./page";
+import { usePatients } from "@/hooks/usePatients";
+
+jest.mock("@/hooks/usePatients", () => ({
+  usePatients: jest.fn(),
+}));
+
+const mockedUsePatients = jest.mocked(usePatients);
+
+describe("PatientsPage", () => {
+  beforeEach(() => {
+    mockedUsePatients.mockReset();
+  });
+
+  it("shows the loading state", () => {
+    mockedUsePatients.mockReturnValue({
+      patients: [],
+      isLoading: true,
+      error: null,
+      total: 0,
+    });
+
+    render(<PatientsPage />);
+
+    expect(screen.getByText("Đang tải danh sách bệnh nhân...")).toBeInTheDocument();
+  });
+
+  it("shows the empty state", () => {
+    mockedUsePatients.mockReturnValue({
+      patients: [],
+      isLoading: false,
+      error: null,
+      total: 0,
+    });
+
+    render(<PatientsPage />);
+
+    expect(screen.getByRole("heading", { level: 3, name: "Không có bệnh nhân" })).toBeInTheDocument();
+    expect(screen.getByText("Hiện chưa có bệnh nhân nào trong hệ thống.")).toBeInTheDocument();
+  });
+});
