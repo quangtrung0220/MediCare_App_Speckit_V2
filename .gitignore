@@ -36,3 +36,9 @@ Thumbs.db
 # Python cache (if any utility scripts appear)
 __pycache__/
 *.pyc
+.agent
+
+# SQLite databases
+*.sqlite
+*.db
+backend/medicare.sqlite
