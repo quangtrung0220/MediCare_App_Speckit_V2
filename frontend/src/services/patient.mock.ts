@@ -91,6 +91,45 @@ export async function fetchPatientsMock(
 }
 
 /**
+ * Real API call for fetching patients with dynamic environment fallback.
+ */
+export async function fetchPatients(options?: { limit?: number; offset?: number }) {
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  try {
+    const skip = options?.offset ?? 0;
+    const take = options?.limit ?? 10;
+    const res = await fetch(`${API_BASE}/patients?skip=${skip}&take=${take}`);
+    if (res.ok) {
+      const result = await res.json();
+      return {
+        patients: result.data.map((p: {
+          id: string;
+          firstName: string;
+          lastName: string;
+          dateOfBirth: string;
+          gender: "M" | "F" | "Other";
+          phone: string;
+          email?: string;
+          updatedAt?: string;
+        }) => ({
+          id: p.id,
+          name: `${p.lastName} ${p.firstName}`,
+          dateOfBirth: p.dateOfBirth,
+          gender: p.gender,
+          phone: p.phone,
+          email: p.email || '',
+          lastVisit: p.updatedAt ? p.updatedAt.slice(0, 10) : undefined,
+        })),
+        total: result.total,
+      };
+    }
+  } catch (e) {
+    console.warn("Failed to fetch patients from real API, falling back to mock", e);
+  }
+  return fetchPatientsMock(options);
+}
+
+/**
  * Simulates fetching a single patient by ID.
  */
 export async function fetchPatientByIdMock(
@@ -101,4 +140,38 @@ export async function fetchPatientByIdMock(
   await new Promise((resolve) => setTimeout(resolve, delay));
 
   return MOCK_PATIENTS.find((p) => p.id === id) ?? null;
+}
+
+/**
+ * Real API call for getting patient by ID with mock fallback.
+ */
+export async function fetchPatientById(id: string) {
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  try {
+    const res = await fetch(`${API_BASE}/patients/${id}`);
+    if (res.ok) {
+      const p = await res.json() as {
+        id: string;
+        firstName: string;
+        lastName: string;
+        dateOfBirth: string;
+        gender: "M" | "F" | "Other";
+        phone: string;
+        email?: string;
+        updatedAt?: string;
+      };
+      return {
+        id: p.id,
+        name: `${p.lastName} ${p.firstName}`,
+        dateOfBirth: p.dateOfBirth,
+        gender: p.gender,
+        phone: p.phone,
+        email: p.email || '',
+        lastVisit: p.updatedAt ? p.updatedAt.slice(0, 10) : undefined,
+      };
+    }
+  } catch (e) {
+    console.warn(`Failed to fetch patient ${id} from real API, falling back to mock`, e);
+  }
+  return fetchPatientByIdMock(id);
 }

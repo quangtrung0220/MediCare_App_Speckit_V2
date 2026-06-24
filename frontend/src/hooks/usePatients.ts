@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from "react";
 import type { PatientRecord } from "@/services/patient.mock";
-import { fetchPatientsMock } from "@/services/patient.mock";
+import { fetchPatients } from "@/services/patient.mock";
 
 export interface UsePatientsState {
   patients: PatientRecord[];
@@ -31,7 +31,7 @@ export function usePatients() {
     const loadPatients = async () => {
       try {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
-        const { patients, total } = await fetchPatientsMock();
+        const { patients, total } = await fetchPatients();
 
         if (isMounted) {
           setState({
