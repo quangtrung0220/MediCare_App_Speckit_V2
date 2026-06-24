@@ -1,0 +1,99 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.title {
+  margin: 0 0 0.5rem 0;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.metricCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metricLabel {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.metricValue {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: var(--brand);
+}
+
+.metricChange {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.positive {
+  color: #166534;
+}
+
+.negative {
+  color: #991b1b;
+}
+
+.filterCard {
+  margin-top: 1rem;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.field label {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.field input,
+.field select {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.notification {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--brand-soft);
+  border: 1px solid var(--brand);
+  border-radius: 8px;
+}
+
+.notification p {
+  margin: 0;
+  font-size: 0.9rem;
+}
