@@ -1,0 +1,68 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dateRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dateLabel {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.dateInput {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.5rem;
+}
+
+.slot {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.slot:hover:not(.disabled) {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  transform: scale(1.02);
+}
+
+.selected {
+  background: var(--brand) !important;
+  color: #fff !important;
+  border-color: var(--brand) !important;
+  font-weight: 600;
+}
+
+.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 2rem;
+}

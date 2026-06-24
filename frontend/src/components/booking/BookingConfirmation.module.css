@@ -1,0 +1,81 @@
+.card,
+.successCard {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+
+.successCard {
+  text-align: center;
+  border-color: var(--brand);
+}
+
+.heading {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.successIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.successHeading {
+  margin: 0 0 1rem;
+  color: var(--brand);
+  font-size: 1.2rem;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.value {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.statusBadge {
+  color: var(--brand);
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.successCard .details {
+  text-align: left;
+  max-width: 320px;
+  margin: 0 auto 1.25rem;
+}
