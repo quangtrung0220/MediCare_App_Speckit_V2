@@ -31,7 +31,9 @@ const NAV_ITEMS = [
   { href: "/medical-records", label: "Medical Records" },
   { href: "/prescriptions", label: "Prescriptions" },
   { href: "/inventory", label: "Inventory" },
+  { href: "/billing", label: "Billing & Invoices" },
   { href: "/reports", label: "Reports" },
+  { href: "/profile/privacy", label: "Data Privacy Settings" },
   { href: "/audit", label: "Audit" },
 ];
 

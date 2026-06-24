@@ -22,7 +22,23 @@
 }
 
 .navLink.active {
-  background: var(--text);
-  color: #134e4a;
+  background: var(--brand-soft);
+  color: var(--brand);
   font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+  }
+  .navLink {
+    flex: 0 0 auto;
+    font-size: 0.85rem;
+    padding: 0.45rem 0.65rem;
+  }
 }

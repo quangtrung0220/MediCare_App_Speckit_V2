@@ -23,14 +23,6 @@ export function AppShell({ children }: AppShellProps) {
         <SidebarNav />
       </aside>
       <main className={styles.main}>
-        <div className={`card ${styles.workspaceHeader}`}>
-          <div>
-            <div className={styles.workspaceTitle}>Clinic Workspace</div>
-            <div className={`muted ${styles.workspaceSubtitle}`}>
-              Shared shell for Android, iOS, and Windows experiences
-            </div>
-          </div>
-        </div>
         {children}
       </main>
     </div>

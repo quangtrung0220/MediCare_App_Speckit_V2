@@ -44,3 +44,21 @@
 .workspaceSubtitle {
   font-size: 0.9rem;
 }
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  .sidebar {
+    flex: 0 0 auto;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 1rem;
+  }
+  .brand {
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+}
