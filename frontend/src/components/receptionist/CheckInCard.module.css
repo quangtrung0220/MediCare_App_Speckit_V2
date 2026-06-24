@@ -1,0 +1,49 @@
+.card {
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 12px;
+  background: var(--card-bg, #ffffff);
+  padding: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+}
+
+.patientName {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--foreground, #111827);
+  margin-bottom: 0.25rem;
+}
+
+.details {
+  font-size: 0.875rem;
+  color: var(--muted-foreground, #6b7280);
+}
+
+.badge {
+  display: inline-flex;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+  width: max-content;
+}
+
+.statusScheduled {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+.statusCheckedIn {
+  background-color: #ecfdf5;
+  color: #047857;
+}

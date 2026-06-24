@@ -1,0 +1,29 @@
+.container {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--foreground, #111827);
+  margin-bottom: 2rem;
+  letter-spacing: -0.025em;
+}
+
+.card {
+  background: var(--card-bg, #ffffff);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #e5e7eb);
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
