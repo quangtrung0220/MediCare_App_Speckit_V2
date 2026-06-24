@@ -1,0 +1,40 @@
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.submitSection {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.vitalsCard {
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  padding: 1.5rem;
+}
+
+.title {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground, #111827);
+}
+
+.successMsg {
+  color: #047857;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
