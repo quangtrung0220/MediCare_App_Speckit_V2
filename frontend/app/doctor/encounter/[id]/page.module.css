@@ -1,0 +1,130 @@
+.container {
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--foreground, #111827);
+  margin: 0;
+}
+
+.workspaceGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .workspaceGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #e5e7eb);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--foreground, #111827);
+  margin-top: 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  padding-bottom: 0.5rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.label {
+  color: var(--muted-foreground, #6b7280);
+}
+
+.value {
+  font-weight: 500;
+  color: var(--foreground, #1f2937);
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  margin-bottom: 1.5rem;
+}
+
+.tab {
+  padding: 0.75rem 1.25rem;
+  background: none;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--muted-foreground, #6b7280);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.tabActive {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+.textarea {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  min-height: 120px;
+  resize: vertical;
+}
+
+.historyItem {
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  margin-bottom: 0.75rem;
+}
+
+.historyMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--muted-foreground, #9ca3af);
+  margin-bottom: 0.25rem;
+}
+
+.historyDiagnosis {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--foreground, #111827);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
