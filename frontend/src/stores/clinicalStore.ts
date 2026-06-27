@@ -158,9 +158,16 @@ export function useClinicalStore() {
         throw new Error('Lỗi lưu ca khám');
       }
 
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(`encounter_completed_${state.activePatient.id}`, 'true');
+      }
+
       setState((s) => ({ ...s, isLoading: false, isSaved: true }));
     } catch (err) {
       console.warn("Saving encounter failed, continuing in mock mode", err);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(`encounter_completed_${state.activePatient.id}`, 'true');
+      }
       setState((s) => ({ ...s, isLoading: false, isSaved: true }));
     }
   }, [state.activePatient, state.symptoms, state.diagnosis, state.prescription]);

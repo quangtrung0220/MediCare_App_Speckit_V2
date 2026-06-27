@@ -26,13 +26,12 @@ const COMMON_DRUGS = [
   "Amlodipine 5mg",
   "Salbutamol Inhaler 100mcg",
 ];
-
 export function PrescriptionBuilder({ items, onAddItem, onRemoveItem }: PrescriptionBuilderProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [dosage, setDosage] = useState("");
   const [frequency, setFrequency] = useState("1 viên / ngày");
-  const [duration, setDuration] = useState("5 ngày");
+  const [duration, setDuration] = useState("5");
 
   const filteredSuggestions = COMMON_DRUGS.filter((d) =>
     d.toLowerCase().includes(searchTerm.toLowerCase())
@@ -44,7 +43,7 @@ export function PrescriptionBuilder({ items, onAddItem, onRemoveItem }: Prescrip
       name: searchTerm.trim(),
       dosage: dosage.trim() || "Tiêu chuẩn",
       frequency,
-      duration,
+      duration: duration ? `${duration} ngày` : "5 ngày",
     });
     setSearchTerm("");
     setDosage("");
@@ -136,8 +135,8 @@ export function PrescriptionBuilder({ items, onAddItem, onRemoveItem }: Prescrip
 
         <Field label="Số ngày uống">
           <TextInput
-            type="text"
-            placeholder="Ví dụ: 7 ngày..."
+            type="number"
+            placeholder="Ví dụ: 7..."
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
           />

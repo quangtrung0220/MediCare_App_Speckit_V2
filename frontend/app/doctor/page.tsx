@@ -5,7 +5,7 @@
  */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -25,7 +25,17 @@ const INITIAL_QUEUE: QueuePatient[] = [
 
 export default function DoctorPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [queue] = useState<QueuePatient[]>(INITIAL_QUEUE);
+  const [queue, setQueue] = useState<QueuePatient[]>(INITIAL_QUEUE);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const updatedQueue = INITIAL_QUEUE.map((p) => {
+        const isCompleted = window.localStorage.getItem(`encounter_completed_${p.id}`) === "true";
+        return isCompleted ? { ...p, status: "COMPLETED" as const } : p;
+      });
+      setQueue(updatedQueue);
+    }
+  }, []);
 
   const filteredQueue = queue.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
