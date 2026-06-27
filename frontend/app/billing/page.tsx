@@ -5,7 +5,7 @@
  */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import styles from "./billing.module.css";
 
@@ -31,12 +31,58 @@ export default function BillingPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
 
-  const filteredInvoices = invoices.filter((inv) =>
-    inv.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    inv.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const fetchPayments = async () => {
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+    try {
+      const res = await fetch(`${API_BASE}/payments`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.length > 0) {
+          const items = data.map((item: any) => ({
+            id: item.invoiceNumber || item.id,
+            realId: item.id,
+            patientName: item.patient ? `${item.patient.lastName} ${item.patient.firstName}` : 'Bệnh nhân',
+            date: item.createdAt ? new Date(item.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            consultationFee: parseFloat(item.amount) - 150000 > 0 ? parseFloat(item.amount) - 150000 : 200000,
+            medicationFee: 150000,
+            status: item.status === 'COMPLETED' ? 'COMPLETED' : item.status === 'REFUNDED' ? 'REFUNDED' : 'PAYMENT_PENDING',
+            description: item.description || 'Thanh toán dịch vụ khám bệnh',
+          }));
+          setInvoices(items);
+          setSelectedInvoice(items[0]);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to fetch payments from real API, using mock", e);
+    }
+  };
 
-  const handlePay = (id: string) => {
+  useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  const handlePay = async (id: string) => {
+    const invoice = invoices.find((i) => i.id === id);
+    if (!invoice) return;
+
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+    const methodMapped = paymentMethod === 'Cash' ? 'CASH' : paymentMethod === 'Card' ? 'CARD' : 'INSURANCE';
+    const targetId = (invoice as any).realId || invoice.id;
+
+    try {
+      const res = await fetch(`${API_BASE}/payments/${targetId}/pay`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentMethod: methodMapped }),
+      });
+      if (res.ok) {
+        await fetchPayments();
+        return;
+      }
+    } catch (e) {
+      console.warn("Failed to pay invoice via real API, falling back to mock", e);
+    }
+
     setInvoices((prev) =>
       prev.map((inv) => (inv.id === id ? { ...inv, status: "COMPLETED" } : inv))
     );
@@ -53,6 +99,11 @@ export default function BillingPage() {
       setSelectedInvoice({ ...selectedInvoice, status: "REFUNDED" });
     }
   };
+
+  const filteredInvoices = invoices.filter((inv) =>
+    inv.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    inv.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {

@@ -5,7 +5,7 @@
  */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import styles from "./reports.module.css";
 
@@ -17,12 +17,53 @@ type ReportMetric = {
 };
 
 export default function ReportsPage() {
-  const metrics: ReportMetric[] = [
+  const [metrics, setMetrics] = useState<ReportMetric[]>([
     { label: "Tổng số lượt khám hôm nay", value: "34 lượt", change: "+12% so với hôm qua", isPositive: true },
     { label: "Tổng doanh thu khám bệnh", value: "8.500.000 ₫", change: "+8% so với tuần trước", isPositive: true },
     { label: "Tỷ lệ vắng mặt (No-show)", value: "3.2%", change: "-1.5% so với tháng trước", isPositive: true },
     { label: "Vật tư cảnh báo sắp hết", value: "2 mặt hàng", change: "Cần đặt thêm", isPositive: false },
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+      try {
+        const res = await fetch(`${API_BASE}/reports`);
+        if (res.ok) {
+          const stats = await res.json();
+          setMetrics([
+            {
+              label: "Tổng số lượt khám hôm nay",
+              value: `${stats.appointmentsCount || 0} lượt`,
+              change: "Từ hệ thống thực tế",
+              isPositive: true
+            },
+            {
+              label: "Tổng doanh thu khám bệnh",
+              value: new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(stats.totalRevenue || 0),
+              change: "Từ hóa đơn thực tế",
+              isPositive: true
+            },
+            {
+              label: "Mật độ dòng bệnh nhân",
+              value: `${stats.patientCount || 0} người`,
+              change: "Đã khám hôm nay",
+              isPositive: true
+            },
+            {
+              label: "Vật tư cảnh báo sắp hết",
+              value: `${stats.lowStockCount || 0} mặt hàng`,
+              change: stats.lowStockCount > 0 ? "Cần bổ sung kho" : "Đầy đủ kho",
+              isPositive: stats.lowStockCount === 0
+            },
+          ]);
+        }
+      } catch (e) {
+        console.warn("Failed to fetch reports from real API, using mock", e);
+      }
+    };
+    fetchReports();
+  }, []);
 
   const [startDate, setStartDate] = useState("2026-06-01");
   const [endDate, setEndDate] = useState("2026-06-24");

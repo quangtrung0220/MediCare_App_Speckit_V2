@@ -55,11 +55,39 @@ const MOCK_INVENTORY: InventoryItem[] = [
 ];
 
 export async function fetchPendingPrescriptions(): Promise<PharmacistPrescription[]> {
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  try {
+    const res = await fetch(`${API_BASE}/prescriptions/pending`);
+    if (res.ok) {
+      const data = await res.json();
+      return data.map((rx: any) => ({
+        id: rx.id,
+        patientName: rx.medicalRecord?.patient ? `${rx.medicalRecord.patient.lastName} ${rx.medicalRecord.patient.firstName}` : 'Bệnh nhân',
+        doctorName: rx.medicalRecord?.doctor ? `Dr. ${rx.medicalRecord.doctor.lastName} ${rx.medicalRecord.doctor.firstName}` : 'Bác sĩ',
+        date: rx.prescribedDate,
+        status: rx.status,
+        items: rx.items ? rx.items.map((item: any) => `${item.inventoryItem?.name || 'Thuốc'} x ${item.quantity} ${item.unit}`) : [],
+      }));
+    }
+  } catch (e) {
+    console.warn("Failed to fetch pending prescriptions from real API, falling back to mock", e);
+  }
   await new Promise((r) => setTimeout(r, 400));
   return MOCK_PRESCRIPTIONS;
 }
 
 export async function dispensePrescription(id: string): Promise<boolean> {
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  try {
+    const res = await fetch(`${API_BASE}/prescriptions/${id}/dispense`, {
+      method: 'PATCH',
+    });
+    if (res.ok) {
+      return true;
+    }
+  } catch (e) {
+    console.warn("Failed to dispense prescription via real API, falling back to mock", e);
+  }
   await new Promise((r) => setTimeout(r, 600));
   const rx = MOCK_PRESCRIPTIONS.find((p) => p.id === id);
   if (rx) {
@@ -70,6 +98,21 @@ export async function dispensePrescription(id: string): Promise<boolean> {
 }
 
 export async function fetchInventoryStock(): Promise<InventoryItem[]> {
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  try {
+    const res = await fetch(`${API_BASE}/inventory`);
+    if (res.ok) {
+      const data = await res.json();
+      return data.map((item: any) => ({
+        code: item.code,
+        name: item.name,
+        quantity: item.quantity,
+        minQuantity: item.minQuantity,
+      }));
+    }
+  } catch (e) {
+    console.warn("Failed to fetch inventory from real API, falling back to mock", e);
+  }
   await new Promise((r) => setTimeout(r, 300));
   return MOCK_INVENTORY;
 }

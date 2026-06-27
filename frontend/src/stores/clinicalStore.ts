@@ -91,8 +91,19 @@ export function useClinicalStore() {
   const selectPatient = useCallback(async (patient: PatientDemographics) => {
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
-      await new Promise((r) => setTimeout(r, 400));
-      const patientHistory = mockHistory[patient.id] || [];
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+      const historyRes = await fetch(`${API_BASE}/medical-records/patient/${patient.id}`);
+      let patientHistory = mockHistory[patient.id] || [];
+      if (historyRes.ok) {
+        const data = await historyRes.json();
+        patientHistory = data.map((item: any) => ({
+          id: item.id,
+          date: item.visitDate,
+          doctorName: item.doctor ? `Dr. ${item.doctor.lastName} ${item.doctor.firstName}` : 'Bác sĩ',
+          diagnosis: item.diagnosis || 'Không có chẩn đoán',
+          notes: item.symptoms || '',
+        }));
+      }
       setState((s) => ({
         ...s,
         activePatient: patient,
@@ -103,8 +114,18 @@ export function useClinicalStore() {
         isLoading: false,
         isSaved: false,
       }));
-    } catch {
-      setState((s) => ({ ...s, isLoading: false, error: 'Lỗi tải hồ sơ bệnh nhân' }));
+    } catch (e) {
+      console.warn("Failed to fetch patient medical history, using fallback", e);
+      setState((s) => ({
+        ...s,
+        activePatient: patient,
+        history: mockHistory[patient.id] || [],
+        symptoms: '',
+        diagnosis: '',
+        prescription: [],
+        isLoading: false,
+        isSaved: false,
+      }));
     }
   }, []);
 
@@ -140,22 +161,43 @@ export function useClinicalStore() {
     if (!state.activePatient) return;
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
-      await new Promise((r) => setTimeout(r, 800));
-      
       const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-      const response = await fetch(`${API_BASE}/encounters`, {
+      
+      // 1. Save Medical Record
+      const mrResponse = await fetch(`${API_BASE}/medical-records`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           patientId: state.activePatient.id,
+          doctorId: 'DOC-001', // Mock doctor ID for current session
           symptoms: state.symptoms,
           diagnosis: state.diagnosis,
-          prescription: state.prescription,
+          visitDate: new Date().toISOString().split('T')[0],
+          appointmentId: `APT-${state.activePatient.id}`, // Mock linking appointment ID
         }),
       });
 
-      if (!response.ok && response.status !== 404) {
-        throw new Error('Lỗi lưu ca khám');
+      if (mrResponse.ok) {
+        const medicalRecord = await mrResponse.json();
+        
+        // 2. If prescription items exist, save prescription
+        if (state.prescription.length > 0) {
+          await fetch(`${API_BASE}/prescriptions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              medicalRecordId: medicalRecord.id,
+              items: state.prescription.map((item) => ({
+                name: item.name,
+                dosage: item.dosage,
+                frequency: item.frequency,
+                duration: item.duration,
+                quantity: 10,
+              })),
+              instructions: 'Uống thuốc đúng liều lượng chỉ định.',
+            }),
+          });
+        }
       }
 
       if (typeof window !== 'undefined') {

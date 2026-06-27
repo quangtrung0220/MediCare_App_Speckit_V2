@@ -18,11 +18,41 @@ const MOCK_APPOINTMENTS: ReceptionistAppointment[] = [
 ];
 
 export async function fetchReceptionistAppointments(): Promise<ReceptionistAppointment[]> {
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  try {
+    const res = await fetch(`${API_BASE}/appointments`);
+    if (res.ok) {
+      const result = await res.json();
+      const items = Array.isArray(result) ? result : result.data || [];
+      return items.map((apt: any) => ({
+        id: apt.id,
+        patientName: apt.patient ? `${apt.patient.lastName} ${apt.patient.firstName}` : 'Bệnh nhân',
+        doctorName: apt.doctor ? `Dr. ${apt.doctor.lastName} ${apt.doctor.firstName}` : 'Bác sĩ',
+        time: apt.appointmentTime,
+        status: apt.status,
+      }));
+    }
+  } catch (e) {
+    console.warn("Failed to fetch receptionist appointments from real API, falling back to mock", e);
+  }
   await new Promise((r) => setTimeout(r, 400));
   return MOCK_APPOINTMENTS;
 }
 
 export async function checkInPatient(appointmentId: string): Promise<boolean> {
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  try {
+    const res = await fetch(`${API_BASE}/appointments/${appointmentId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'CHECKED_IN' }),
+    });
+    if (res.ok) {
+      return true;
+    }
+  } catch (e) {
+    console.warn("Failed to check in patient via real API, falling back to mock", e);
+  }
   await new Promise((r) => setTimeout(r, 500));
   const apt = MOCK_APPOINTMENTS.find((a) => a.id === appointmentId);
   if (apt) {

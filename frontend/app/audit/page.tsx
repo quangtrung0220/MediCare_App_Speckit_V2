@@ -5,7 +5,7 @@
  */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./page.module.css";
 
 interface AuditLog {
@@ -25,7 +25,33 @@ const MOCK_LOGS: AuditLog[] = [
 ];
 
 export default function AuditPage() {
-  const [logs] = useState<AuditLog[]>(MOCK_LOGS);
+  const [logs, setLogs] = useState<AuditLog[]>(MOCK_LOGS);
+
+  useEffect(() => {
+    const fetchAuditLogs = async () => {
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+      try {
+        const res = await fetch(`${API_BASE}/audit`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.length > 0) {
+            const items = data.map((log: any) => ({
+              id: log.id.slice(0, 8).toUpperCase(),
+              timestamp: log.timestamp.replace('T', ' ').slice(0, 19),
+              actor: log.user ? log.user.email : 'system@medicare.vn',
+              action: log.action || 'ACCESS',
+              ipAddress: log.ipAddress || '127.0.0.1',
+              userAgent: log.userAgent ? log.userAgent.split(' ')[0] : 'Browser',
+            }));
+            setLogs(items);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to fetch audit logs from real API, using mock", e);
+      }
+    };
+    fetchAuditLogs();
+  }, []);
 
   const getActionBadgeClass = (action: string) => {
     if (action.startsWith("READ")) return styles.actionRead;
