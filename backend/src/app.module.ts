@@ -5,6 +5,12 @@ import { HealthModule } from './health/health.module';
 import { DatabaseModule } from './database/database.module';
 import { PatientModule } from './patient/patient.module';
 import { AppointmentModule } from './appointment/appointment.module';
+import { DoctorModule } from './doctor/doctor.module';
+import { ClinicalModule } from './clinical/clinical.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { BillingModule } from './billing/billing.module';
+import { ReportsModule } from './reports/reports.module';
+import { AuditModule } from './audit/audit.module';
 
 /**
  * AppModule — Root module.
@@ -18,7 +24,12 @@ import { AppointmentModule } from './appointment/appointment.module';
     HealthModule,
     PatientModule,
     AppointmentModule,
-    // AuthModule will be added when T028 is implemented
+    DoctorModule,
+    ClinicalModule,
+    InventoryModule,
+    BillingModule,
+    ReportsModule,
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],
