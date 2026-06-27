@@ -21,14 +21,14 @@ export class AppointmentRepository implements IAppointmentRepository {
       skip: options?.skip,
       take: options?.take,
       order: { appointmentDate: 'ASC', appointmentTime: 'ASC' },
-      relations: ['patient', 'doctor'],
+      relations: { patient: true, doctor: true },
     });
   }
 
   async findById(id: string): Promise<Appointment | null> {
     return this.repo.findOne({
       where: { id },
-      relations: ['patient', 'doctor'],
+      relations: { patient: true, doctor: true },
     });
   }
 
@@ -57,7 +57,7 @@ export class AppointmentRepository implements IAppointmentRepository {
     return this.repo.find({
       where: { patientId },
       order: { appointmentDate: 'DESC' },
-      relations: ['doctor'],
+      relations: { doctor: true },
     });
   }
 
@@ -65,7 +65,7 @@ export class AppointmentRepository implements IAppointmentRepository {
     return this.repo.find({
       where: { doctorId },
       order: { appointmentDate: 'ASC', appointmentTime: 'ASC' },
-      relations: ['patient'],
+      relations: { patient: true },
     });
   }
 

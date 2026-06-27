@@ -27,7 +27,7 @@ export class DoctorRepository implements IDoctorRepository {
   async findById(id: string): Promise<Doctor | null> {
     return this.repo.findOne({
       where: { id },
-      relations: ['schedules'],
+      relations: { schedules: true },
     });
   }
 
@@ -63,7 +63,7 @@ export class DoctorRepository implements IDoctorRepository {
   async findAvailable(): Promise<Doctor[]> {
     return this.repo.find({
       where: { isAvailable: true },
-      relations: ['schedules'],
+      relations: { schedules: true },
     });
   }
 }

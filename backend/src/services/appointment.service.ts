@@ -4,7 +4,8 @@
  * Owner: Quang Trung
  */
 import { Injectable, Inject, NotFoundException, ConflictException } from '@nestjs/common';
-import { APPOINTMENT_REPOSITORY, IAppointmentRepository } from './contracts';
+import { APPOINTMENT_REPOSITORY } from './contracts';
+import type { IAppointmentRepository } from './contracts';
 import { Appointment } from '../models/appointment.entity';
 
 @Injectable()

@@ -4,7 +4,8 @@
  * Owner: Quang Trung
  */
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { PATIENT_REPOSITORY, IPatientRepository } from './contracts';
+import { PATIENT_REPOSITORY } from './contracts';
+import type { IPatientRepository } from './contracts';
 import { Patient } from '../models/patient.entity';
 
 @Injectable()
