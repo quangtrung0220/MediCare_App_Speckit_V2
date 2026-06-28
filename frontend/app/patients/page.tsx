@@ -269,10 +269,10 @@ export default function PatientsPage() {
                 
                 return (
                   <tr key={patient.id}>
-                    <td>
+                    <td data-label="Mã BN">
                       <span className={styles.patientIdBadge}>{patient.id}</span>
                     </td>
-                    <td>
+                    <td data-label="Bệnh nhân">
                       <div className={styles.patientCell}>
                         <div
                           className={`${styles.avatar} ${
@@ -293,7 +293,7 @@ export default function PatientsPage() {
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Liên hệ">
                       <div className={styles.contactCell}>
                         <div className={styles.contactItem}>
                           <span className={styles.contactIcon}>📞</span> {patient.phone}
@@ -305,8 +305,8 @@ export default function PatientsPage() {
                         )}
                       </div>
                     </td>
-                    <td className={styles.dobCell}>{patient.dateOfBirth}</td>
-                    <td>
+                    <td data-label="Ngày sinh" className={styles.dobCell}>{patient.dateOfBirth}</td>
+                    <td data-label="Lần khám cuối">
                       {patient.lastVisit ? (
                         <span className={`${styles.statusBadge} ${styles.statusActive}`}>
                           Lần khám cuối: {patient.lastVisit}
@@ -317,7 +317,7 @@ export default function PatientsPage() {
                         </span>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Thao tác">
                       <div className={styles.actionsCell}>
                         <Link
                           href={`/medical-records?patientId=${patient.id}`}

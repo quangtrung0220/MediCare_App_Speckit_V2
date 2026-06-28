@@ -428,6 +428,7 @@
   align-items: center;
   gap: 6px;
   text-decoration: none;
+  white-space: nowrap;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -686,3 +687,99 @@
   box-shadow: none;
   transform: none;
 }
+
+/* Responsive Table layout for mobile viewports */
+@media (max-width: 768px) {
+  .tableWrapper {
+    border: none;
+    box-shadow: none;
+  }
+  
+  .table, 
+  .table thead, 
+  .table tbody, 
+  .table th, 
+  .table td, 
+  .table tr {
+    display: block;
+  }
+  
+  .table thead {
+    display: none; /* Hide standard headers on mobile */
+  }
+  
+  .table tbody tr {
+    background: var(--panel, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.005);
+    transition: transform 0.2s ease;
+  }
+  
+  .table tbody tr:hover {
+    transform: translateY(-2px);
+    background-color: var(--panel, #ffffff);
+  }
+  
+  .table td {
+    border: none;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #f1f5f9;
+  }
+  
+  .table td:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-top: 12px;
+  }
+
+  /* Expose column names using data-label attribute */
+  .table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--brand, #0f766e);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .table td[data-label="Bệnh nhân"] {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+  }
+  
+  .table td[data-label="Bệnh nhân"]::before {
+    display: none;
+  }
+
+  .table td[data-label="Thao tác"] {
+    justify-content: center;
+    padding-top: 12px;
+  }
+
+  .table td[data-label="Thao tác"]::before {
+    display: none;
+  }
+  
+  .actionsCell {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .actionBtn {
+    justify-content: center;
+    width: 100%;
+    padding: 10px;
+  }
+}
+
