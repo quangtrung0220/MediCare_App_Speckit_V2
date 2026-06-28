@@ -1,6 +1,6 @@
 # HƯỚNG DẪN DEBUG & KHẮC PHỤC LỖI HỆ THỐNG MEDICARE (DEBUGGING GUIDE)
 
-Tài liệu này hướng dẫn cách chẩn đoán, kiểm tra log, và khắc phục nhanh các lỗi thường gặp trên từng màn hình chức năng của ứng dụng MediCare (E2E).
+Tài liệu này cung cấp các hướng dẫn chẩn đoán lỗi chi tiết và các ví dụ thực tế cụ thể để sửa lỗi trên từng phân hệ màn hình của MediCare.
 
 ---
 
@@ -24,49 +24,151 @@ Tài liệu này hướng dẫn cách chẩn đoán, kiểm tra log, và khắc 
 
 ---
 
-## 2. Các Lỗi Thường Gặp Ở Từng Màn Hình & Cách Khắc Phục
+## 2. 5 Tình Huống Lỗi Thực Tế & Hướng Dẫn Sửa Lỗi Chi Tiết
 
-### Màn hình 1: Tổng quan (Overview Dashboard)
-* **Triệu chứng**: Các con số thống kê hiển thị bằng `0` hoặc không đổi; biểu đồ không hiển thị dữ liệu thực tế.
-* **Cách Debug**:
-  1. Kiểm tra API: Mở tab Network, tìm yêu cầu gửi tới `http://localhost:3001/api/v1/health` và `http://localhost:3001/api/v1/reports`.
-  2. Nếu Backend trả về lỗi 500: Xem log NestJS xem có kết nối được file SQLite không.
-  3. Lỗi căn lệch tâm biểu đồ tròn: Đã được xử lý bằng cách loại bỏ `transform-origin` trong CSS. Không tự ý thêm quy tắc transform-origin vào phần tử SVG.
-
-### Màn hình 2: Bàn Lễ tân (Reception Desk) & Đặt lịch
-* **Triệu chứng**: Bấm nút "Xác nhận Check-in" nhưng trạng thái bệnh nhân không đổi; hoặc đặt lịch hẹn mới báo lỗi.
-* **Cách Debug**:
-  1. Kiểm tra yêu cầu PATCH gửi tới `http://localhost:3001/api/v1/appointments/:id/check-in`.
-  2. Kiểm tra xem `patientId` và `doctorId` gửi lên biểu mẫu có khớp chính xác với ID thực tế trong database không (nếu ID không tồn tại, database sẽ báo lỗi ràng buộc khóa ngoại - Foreign Key Constraint).
-
-### Màn hình 3: Bàn Điều dưỡng (Nurse Desk)
-* **Triệu chứng**: Nhập chỉ số sinh hiệu và lưu báo lỗi đỏ hoặc không lưu thành công.
-* **Cách Debug**:
-  1. Kiểm tra xem các trường số liệu (Huyết áp, Nhịp tim, Nhiệt độ) có bị nhập sai định dạng chữ không.
-  2. Kiểm tra API `POST http://localhost:3001/api/v1/medical-records`. Nếu lỗi cơ sở dữ liệu, kiểm tra xem bảng `medical_records` có thiếu cột nào không thông qua lệnh kiểm tra schema của TypeORM.
-
-### Màn hình 4: Bàn chẩn đoán của Bác sĩ (Doctor Desk)
-* **Triệu chứng 1**: Ô tìm gợi ý thuốc không hiển thị danh mục thuốc khi nhập tên.
-  * **Cách Debug**: Kiểm tra xem kho dược có dữ liệu không. Xem API `/api/v1/inventory` có trả về danh sách trống không.
-* **Triệu chứng 2**: Lưu ca khám thành công nhưng không tạo được hóa đơn thanh toán hoặc đơn thuốc.
-  * **Cách Debug**: Luồng này thực hiện liên tục 2 API: Đầu tiên là tạo bệnh án EMR (`POST /medical-records`), sau đó lấy ID EMR vừa sinh ra để tạo đơn thuốc (`POST /prescriptions`).
-  * Nếu bước 1 thành công nhưng bước 2 thất bại, kiểm tra log TypeORM xem bảng `prescription_items` có lỗi ràng buộc dữ liệu hoặc lỗi kiểu dữ liệu hay không.
-
-### Màn hình 5: Quầy phát thuốc của Dược sĩ (Pharmacy Desk)
-* **Triệu chứng**: Bấm nút "Cấp phát" nhưng số lượng thuốc tồn kho không thay đổi.
-* **Cách Debug**:
-  1. Kiểm tra mã nguồn phương thức `dispensePrescription` trong `clinical.service.ts` tại backend.
-  2. Kiểm tra xem ID thuốc trong đơn thuốc (`inventoryItemId`) có liên kết khớp chính xác với bản ghi thuốc trong bảng `inventory_items` không. Nếu liên kết bị `NULL`, hệ thống không thể trừ kho dược.
-
-### Màn hình 6: Quầy Thanh toán (Billing & Invoices)
-* **Triệu chứng**: Hóa đơn đã bấm "Thanh toán" nhưng vẫn nằm trong danh sách Chờ (Pending).
-* **Cách Debug**:
-  1. Kiểm tra API `PATCH http://localhost:3001/api/v1/payments/:id/pay`.
-  2. Xem cơ sở dữ liệu bảng `payments`, cột `status` đã cập nhật sang `'COMPLETED'` và cột `completedAt` đã ghi nhận mốc thời gian hay chưa.
+### 🛠️ Tình huống 1: Lỗi CORS khi Gọi API Backend
+* **Triệu chứng**: Giao diện Overview Dashboard không tải được biểu đồ và các số liệu thống kê. Mở F12 DevTools Console thấy thông báo lỗi màu đỏ:
+  ```text
+  Access to fetch at 'http://localhost:3001/api/v1/health' from origin 'http://localhost:3000' 
+  has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+  ```
+* **Nguyên nhân**: NestJS Backend (chạy ở cổng `3001`) từ chối nhận các yêu cầu HTTP gửi đến từ Next.js Frontend (chạy ở cổng `3000`) do chính sách bảo mật nguồn gốc.
+* **Cách khắc phục**:
+  1. Mở file cấu hình chính của NestJS: [main.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/main.ts).
+  2. Đảm bảo rằng phương thức `enableCors` đã được kích hoạt trước khi ứng dụng khởi chạy:
+     ```typescript
+     // main.ts
+     const app = await NestFactory.create(AppModule);
+     app.setGlobalPrefix('api/v1');
+     
+     // Bật CORS cho phép Next.js truy cập
+     app.enableCors({
+       origin: 'http://localhost:3000',
+       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+       credentials: true,
+     });
+     
+     await app.listen(3001);
+     ```
+  3. Khởi động lại backend để áp dụng cấu hình mới.
 
 ---
 
-## 3. Các Lệnh Tiện Ích Phục Vụ Debug Nhanh
+### 🛠️ Tình huống 2: Lỗi Khóa Cơ Sở Dữ Liệu (`SQLITE_BUSY: database is locked`)
+* **Triệu chứng**: Bác sĩ nhấn nút "Lưu ca khám" hoặc Lễ tân xác nhận "Check-in", giao diện báo lỗi đỏ và terminal NestJS backend in ra thông báo:
+  ```text
+  QueryFailedError: SQLITE_BUSY: database is locked
+      at SquireDriver.ts:215
+  ```
+* **Nguyên nhân**: SQLite là cơ sở dữ liệu dạng tệp đơn giản. Nó chỉ cho phép một luồng tiến trình thực hiện ghi dữ liệu tại một thời điểm. Nếu bạn đang mở tệp `medicare.sqlite` bằng một công cụ xem DB ngoài (như DB Browser for SQLite) ở chế độ đang chỉnh sửa chưa commit, hoặc chạy lệnh Seed dữ liệu khi server NestJS đang thực hiện ghi, SQLite sẽ khóa tệp lại.
+* **Cách khắc phục**:
+  1. Đóng toàn bộ các chương trình xem cơ sở dữ liệu SQLite bên ngoài đang kết nối tới tệp `medicare.sqlite`.
+  2. Nếu chạy các tác vụ chạy ngầm, hãy thiết lập tham số chờ kết nối (connection timeout) trong cấu hình kết nối TypeORM của bạn:
+     ```typescript
+     // data-source.ts hoặc app.module.ts
+     TypeOrmModule.forRoot({
+       type: 'sqlite',
+       database: 'medicare.sqlite',
+       entities: [...],
+       synchronize: true,
+       // Tăng thời gian chờ ghi nếu DB bận (đơn vị: mili-giây)
+       extra: {
+         busyTimeout: 5000, 
+       }
+     })
+     ```
+  3. Khởi động lại tiến trình server NestJS.
+
+---
+
+### 🛠️ Tình huống 3: Lỗi Ràng Buộc Khóa Ngoại khi Đặt Lịch Hẹn (`FOREIGN KEY constraint failed`)
+* **Triệu chứng**: Lễ tân đặt lịch hẹn cho bệnh nhân có mã số `PAT-999` nhưng hệ thống báo lỗi thất bại. Terminal NestJS in log:
+  ```text
+  QueryFailedError: SQLITE_CONSTRAINT: FOREIGN KEY constraint failed
+  ```
+* **Nguyên nhân**: Bảng `appointments` có cột `patientId` liên kết với khóa chính của bảng `patients`. Việc đặt lịch cho bệnh nhân có ID `PAT-999` khi bệnh nhân này chưa hề được đăng ký trong bảng `patients` sẽ phá vỡ tính toàn vẹn dữ liệu.
+* **Cách khắc phục**:
+  1. Hãy đảm bảo kiểm tra sự tồn tại của bệnh nhân trước khi đặt lịch hẹn.
+  2. Kiểm tra trong phương thức tạo lịch hẹn ở [appointment.service.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/services/appointment.service.ts):
+     ```typescript
+     async createAppointment(dto: CreateAppointmentDto) {
+       // Bước 1: Xác thực xem bệnh nhân có tồn tại không
+       const patient = await this.patientRepo.findOne({ where: { id: dto.patientId } });
+       if (!patient) {
+         throw new NotFoundException(`Không tìm thấy bệnh nhân có mã số ${dto.patientId}`);
+       }
+       
+       // Bước 2: Tạo lịch hẹn
+       const appt = this.apptRepo.create(dto);
+       return await this.apptRepo.save(appt);
+     }
+     ```
+  3. Đăng ký thông tin bệnh nhân trước trong màn hình **Patients Directory** rồi mới tiến hành đặt lịch.
+
+---
+
+### 🛠️ Tình huống 4: Số Lượng Thuốc Tồn Kho Không Trừ khi Dược Sĩ Cấp Phát
+* **Triệu chứng**: Dược sĩ ấn nút "Cấp phát" (Dispense) đơn thuốc gồm 5 viên `Paracetamol 500mg`. Đơn thuốc đổi sang trạng thái `DISPENSED`, nhưng khi kiểm tra trang **Medicine Inventory**, tồn kho của Paracetamol vẫn giữ nguyên không giảm.
+* **Nguyên nhân**: Logic xử lý của Dược sĩ chỉ cập nhật trạng thái đơn thuốc mà quên không thực hiện truy vấn giảm số lượng tồn kho (`quantity`) của thuốc trong bảng `inventory_items`.
+* **Cách khắc phục**:
+  1. Mở file xử lý cấp phát đơn thuốc tại backend: `backend/src/services/clinical.service.ts`.
+  2. Đảm bảo vòng lặp duyệt qua các loại thuốc trong đơn thuốc và trừ số lượng tương ứng trong kho dược:
+     ```typescript
+     // clinical.service.ts
+     async dispensePrescription(prescriptionId: string) {
+       const prescription = await this.prescriptionRepo.findOne({
+         where: { id: prescriptionId },
+         relations: ['items']
+       });
+       
+       if (!prescription) throw new NotFoundException('Không tìm thấy đơn thuốc');
+       
+       // Duyệt từng thuốc trong đơn để trừ kho
+       for (const item of prescription.items) {
+         const invItem = await this.inventoryRepo.findOne({ where: { name: item.name } });
+         if (invItem) {
+           // Giảm trừ kho
+           invItem.quantity = Math.max(0, invItem.quantity - item.quantity);
+           await this.inventoryRepo.save(invItem);
+           
+           console.log(`Đã trừ kho thuốc ${item.name}: -${item.quantity} viên. Còn lại: ${invItem.quantity}`);
+         }
+       }
+       
+       prescription.status = 'DISPENSED';
+       return await this.prescriptionRepo.save(prescription);
+     }
+     ```
+
+---
+
+### 🛠️ Tình huống 5: Lỗi Định Dạng Ngày Khám (`Invalid Date` hoặc `NaN-NaN-NaN`)
+* **Triệu chứng**: Trên màn hình bệnh án bệnh nhân, phần lịch sử hiển thị ngày khám là `NaN-NaN-NaN` hoặc không hiển thị thông tin ngày.
+* **Nguyên nhân**: Frontend gửi chuỗi ngày khám lên Backend bằng đối tượng `new Date()` chứa múi giờ đầy đủ (ví dụ: `2026-06-28T06:30:00.000Z`), nhưng Backend hoặc DB SQLite chỉ lưu trữ chuỗi văn bản ngày dạng ngắn `YYYY-MM-DD`. Khi Frontend nhận lại chuỗi ngày không chuẩn và thực hiện tách chuỗi hoặc chuyển đổi định dạng sẽ sinh lỗi `Invalid Date`.
+* **Cách khắc phục**:
+  1. Đồng bộ hóa định dạng ngày khám thành chuỗi `YYYY-MM-DD` chuẩn ISO ngắn gọn trước khi truyền tải qua API.
+  2. Ở Frontend, chuẩn hóa ngày gửi đi:
+     ```typescript
+     // Khi lưu ca khám bệnh
+     const visitDate = new Date().toISOString().split('T')[0]; // Trả về dạng: "2026-06-28"
+     ```
+  3. Ở tệp hiển thị, dùng hàm chuyển đổi an toàn để phòng tránh hiển thị lỗi:
+     ```typescript
+     export function formatDate(dateString: string): string {
+       if (!dateString) return 'Chưa xác định';
+       const date = new Date(dateString);
+       if (isNaN(date.getTime())) {
+         // Nếu chuỗi ngày bị lỗi, thử cắt chuỗi ký tự cơ bản
+         return dateString.substring(0, 10);
+       }
+       // Trả về định dạng Việt Nam ngày/tháng/năm
+       return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+     }
+     ```
+
+---
+
+## 4. Các Lệnh Tiện Ích Phục Vụ Debug Nhanh
 
 * **Chạy kiểm thử frontend**:
   `npm run test` (Chạy các bộ unit test Jest để phát hiện sớm lỗi giao diện bị vỡ hoặc đổi tên nút bấm).
