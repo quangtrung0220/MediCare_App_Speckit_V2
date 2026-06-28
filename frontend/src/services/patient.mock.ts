@@ -175,3 +175,57 @@ export async function fetchPatientById(id: string) {
   }
   return fetchPatientByIdMock(id);
 }
+
+/**
+ * Creates a new patient on the backend, falling back to local memory mock state if unreachable.
+ */
+export async function createPatient(patientData: {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: "M" | "F" | "Other";
+  phone: string;
+  email?: string;
+}): Promise<PatientRecord> {
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  try {
+    const res = await fetch(`${API_BASE}/patients`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(patientData),
+    });
+    if (res.ok) {
+      const p = await res.json();
+      const createdRecord: PatientRecord = {
+        id: p.id,
+        name: `${p.lastName} ${p.firstName}`,
+        dateOfBirth: p.dateOfBirth,
+        gender: p.gender as "M" | "F" | "Other",
+        phone: p.phone || "",
+        email: patientData.email || "",
+        lastVisit: undefined,
+      };
+      // Synchronize in-memory list so local fallbacks are in sync
+      MOCK_PATIENTS.unshift(createdRecord);
+      return createdRecord;
+    }
+  } catch (e) {
+    console.warn("Failed to create patient on NestJS backend, creating locally", e);
+  }
+
+  // Local memory fallback
+  const createdRecord: PatientRecord = {
+    id: `PAT-00${MOCK_PATIENTS.length + 1}`,
+    name: `${patientData.lastName} ${patientData.firstName}`,
+    dateOfBirth: patientData.dateOfBirth,
+    gender: patientData.gender,
+    phone: patientData.phone,
+    email: patientData.email || "",
+    lastVisit: undefined,
+  };
+  MOCK_PATIENTS.unshift(createdRecord);
+  return createdRecord;
+}
+

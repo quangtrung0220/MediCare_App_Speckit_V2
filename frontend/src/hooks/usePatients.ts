@@ -25,40 +25,32 @@ export function usePatients() {
     total: 0,
   });
 
+  const loadPatients = async () => {
+    try {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+      const { patients, total } = await fetchPatients();
+
+      setState({
+        patients,
+        total,
+        isLoading: false,
+        error: null,
+      });
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: err instanceof Error ? err.message : "Đã xảy ra lỗi không xác định",
+      }));
+    }
+  };
+
   useEffect(() => {
-    let isMounted = true;
-
-    const loadPatients = async () => {
-      try {
-        setState((prev) => ({ ...prev, isLoading: true, error: null }));
-        const { patients, total } = await fetchPatients();
-
-        if (isMounted) {
-          setState({
-            patients,
-            total,
-            isLoading: false,
-            error: null,
-          });
-        }
-      } catch (err) {
-        if (isMounted) {
-          setState((prev) => ({
-            ...prev,
-            isLoading: false,
-            error: err instanceof Error ? err.message : "Đã xảy ra lỗi không xác định",
-          }));
-        }
-      }
-    };
-
     loadPatients();
-
-    // Cleanup: prevent state updates if component unmounts
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
-  return state;
+  return {
+    ...state,
+    refetch: loadPatients,
+  };
 }
