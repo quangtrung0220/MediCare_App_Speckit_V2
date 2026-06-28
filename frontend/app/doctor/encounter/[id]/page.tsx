@@ -43,7 +43,7 @@ export default function DoctorEncounterPage({ params }: PageProps) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Ca khám lâm nghiệp (Encounter Workspace)</h1>
+        <h1 className={styles.title}>Ca khám lâm sàng (Encounter Workspace)</h1>
         <Link href="/doctor" className="link-button">
           ← Quay lại danh sách
         </Link>
