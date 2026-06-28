@@ -10,6 +10,11 @@ import { Patient } from '../../models/patient.entity';
 import { Doctor } from '../../models/doctor.entity';
 import { DoctorSchedule } from '../../models/doctor-schedule.entity';
 import { InventoryItem } from '../../models/inventory-item.entity';
+import { MedicalRecord } from '../../models/medical-record.entity';
+import { Prescription } from '../../models/prescription.entity';
+import { PrescriptionItem } from '../../models/prescription-item.entity';
+import { Payment } from '../../models/payment.entity';
+import { Appointment } from '../../models/appointment.entity';
 
 async function seed() {
   const ds = new DataSource({
@@ -87,6 +92,131 @@ async function seed() {
     { name: 'Surgical Gloves (M)', code: 'SUP-002', category: 'SUPPLY', quantity: 500, unit: 'pair', minQuantity: 100, maxQuantity: 2000, unitPrice: 8000 },
   ]);
   console.log(`✅ Seeded ${inventory.length} inventory items`);
+
+  // --- Medical Records & Prescriptions ---
+  const medicalRecordRepo = ds.getRepository(MedicalRecord);
+  const prescriptionRepo = ds.getRepository(Prescription);
+  const prescriptionItemRepo = ds.getRepository(PrescriptionItem);
+  const paymentRepo = ds.getRepository(Payment);
+  const appointmentRepo = ds.getRepository(Appointment);
+
+  const record1 = await medicalRecordRepo.save({
+    patientId: patients[0].id,
+    doctorId: doctors[0].id,
+    visitDate: new Date().toISOString().split('T')[0],
+    symptoms: 'Sốt cao, đau họng',
+    diagnosis: 'Cảm cúm cấp tính',
+    treatment: 'Nghỉ ngơi và uống nhiều nước ấm',
+    vitalSigns: 'BP: 120/80, Temp: 38.5C',
+  });
+
+  const record2 = await medicalRecordRepo.save({
+    patientId: patients[1].id,
+    doctorId: doctors[1].id,
+    visitDate: new Date().toISOString().split('T')[0],
+    symptoms: 'Ho khan kéo dài, đau ngực nhẹ',
+    diagnosis: 'Viêm phế quản nhẹ',
+    treatment: 'Uống siro ho và kháng sinh đầy đủ',
+    vitalSigns: 'BP: 115/75, Temp: 37.2C',
+  });
+
+  console.log(`✅ Seeded ${2} medical records`);
+
+  const prescription1 = await prescriptionRepo.save({
+    medicalRecordId: record1.id,
+    prescribedDate: new Date().toISOString().split('T')[0],
+    status: 'PENDING',
+    instructions: 'Uống sau ăn 30 phút',
+  });
+
+  const prescription2 = await prescriptionRepo.save({
+    medicalRecordId: record2.id,
+    prescribedDate: new Date().toISOString().split('T')[0],
+    status: 'PENDING',
+    instructions: 'Uống sáng tối hàng ngày',
+  });
+
+  console.log(`✅ Seeded ${2} pending prescriptions`);
+
+  await prescriptionItemRepo.save([
+    {
+      prescriptionId: prescription1.id,
+      inventoryItemId: inventory[0].id, // Paracetamol
+      quantity: 10,
+      unit: 'tablet',
+      dosage: '500mg',
+      frequency: '3 lần/ngày',
+      duration: '3 ngày',
+    },
+    {
+      prescriptionId: prescription1.id,
+      inventoryItemId: inventory[1].id, // Amoxicillin
+      quantity: 14,
+      unit: 'capsule',
+      dosage: '500mg',
+      frequency: '2 lần/ngày',
+      duration: '7 ngày',
+    },
+    {
+      prescriptionId: prescription2.id,
+      inventoryItemId: inventory[2].id, // Vitamin C
+      quantity: 20,
+      unit: 'tablet',
+      dosage: '1000mg',
+      frequency: '1 lần/ngày',
+      duration: '20 ngày',
+    },
+  ]);
+  console.log(`✅ Seeded prescription line items`);
+
+  // --- Seed Pending Billing Payments ---
+  await paymentRepo.save([
+    {
+      patientId: patients[0].id,
+      amount: 150000,
+      status: 'PENDING',
+      invoiceNumber: `INV-${Date.now()}-001`,
+      description: 'Phí dịch vụ khám lâm sàng nội khoa',
+    },
+    {
+      patientId: patients[1].id,
+      amount: 320000,
+      status: 'PENDING',
+      invoiceNumber: `INV-${Date.now()}-002`,
+      description: 'Phí dịch vụ khám nhi & tiền thuốc liên quan',
+    },
+  ]);
+  console.log(`✅ Seeded pending billing invoices`);
+
+  // --- Seed Appointments ---
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  await appointmentRepo.save([
+    {
+      patientId: patients[0].id,
+      doctorId: doctors[0].id,
+      appointmentDate: tomorrowStr,
+      appointmentTime: '09:00',
+      durationMinutes: 30,
+      type: 'CONSULTATION',
+      status: 'SCHEDULED',
+      notes: 'Khám kiểm tra dạ dày',
+    },
+    {
+      patientId: patients[1].id,
+      doctorId: doctors[1].id,
+      appointmentDate: todayStr,
+      appointmentTime: '10:30',
+      durationMinutes: 30,
+      type: 'FOLLOW_UP',
+      status: 'CHECKED_IN',
+      notes: 'Tái khám hô hấp nhi khoa',
+    },
+  ]);
+  console.log(`✅ Seeded active appointments (Scheduled & Checked-In)`);
 
   await ds.destroy();
   console.log('🎉 Seeding complete!');
