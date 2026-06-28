@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import BillingPage from "../../app/billing/page";
 import ReportsPage from "../../app/reports/page";
 import PrivacyPage from "../../app/profile/privacy/page";
@@ -34,15 +34,17 @@ describe("Admin & Utility Screens Tests", () => {
   });
 
   describe("ReportsPage", () => {
-    it("renders operational metric cards and date parameters", () => {
+    it("renders operational metric cards and date parameters", async () => {
       render(<ReportsPage />);
       expect(screen.getByText("Tổng số lượt khám hôm nay")).toBeInTheDocument();
       expect(screen.getByText("Trích xuất Báo cáo Định kỳ")).toBeInTheDocument();
 
-      const selectBtn = screen.getByRole("button", { name: "Tải Báo cáo PDF" });
+      const selectBtn = screen.getByRole("button", { name: "📥 Tải Báo cáo PDF" });
       fireEvent.click(selectBtn);
 
-      expect(screen.getByText(/Đã tải xuống báo cáo dạng PDF thành công/)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/báo cáo định kỳ dạng PDF thành công/i)).toBeInTheDocument();
+      }, { timeout: 2000 });
     });
   });
 

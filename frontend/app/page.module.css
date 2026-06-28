@@ -315,3 +315,119 @@
   background: #f0fdfa;
   color: #0d9488;
 }
+
+/* Dynamic Interactive SVG Charts Styles */
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.chartToggle {
+  display: flex;
+  background: var(--bg, #f8fafc);
+  padding: 4px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.toggleBtn {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted, #64748b);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggleBtn:hover {
+  color: var(--text, #0f172a);
+}
+
+.activeToggle {
+  background: var(--card-bg, #ffffff);
+  color: var(--brand, #0f766e) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.chartLegend {
+  font-size: 13px;
+  color: var(--muted, #64748b);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendDotBlue {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2563eb;
+  display: inline-block;
+}
+
+.legendDotTeal {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0f766e;
+  display: inline-block;
+}
+
+.svgWrapper {
+  width: 100%;
+  overflow: visible;
+  padding: 10px 0;
+}
+
+.svgChart {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chartText {
+  font-size: 11px;
+  fill: #64748b;
+  font-weight: 500;
+}
+
+.chartPointGroup {
+  cursor: pointer;
+}
+
+.chartCircle {
+  transition: r 0.2s ease, fill 0.2s ease;
+}
+
+.chartPointGroup:hover .chartCircle {
+  r: 7;
+  fill: #1e3a8a;
+}
+
+.chartTooltip {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+}
+
+.chartPointGroup:hover .chartTooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.chartBar {
+  transition: fill 0.2s ease, filter 0.2s ease;
+}
+
+.chartPointGroup:hover .chartBar {
+  fill: #115e59;
+  filter: brightness(1.1);
+}
+

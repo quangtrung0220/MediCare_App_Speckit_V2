@@ -27,11 +27,11 @@ describe("AppShell and SidebarNav", () => {
     render(<SidebarNav />);
 
     // Get the active navlink element (based on mocked usePathname returning "/book-appointment")
-    const bookAppointmentLink = screen.getByRole("link", { name: "Book Appointment" });
+    const bookAppointmentLink = screen.getByRole("link", { name: "✍️ Book Appointment" });
     expect(bookAppointmentLink).toBeInTheDocument();
     expect(bookAppointmentLink).toHaveClass("active");
 
-    const overviewLink = screen.getByRole("link", { name: "Overview" });
+    const overviewLink = screen.getByRole("link", { name: "🏥 Overview" });
     expect(overviewLink).toBeInTheDocument();
     expect(overviewLink).not.toHaveClass("active");
   });
