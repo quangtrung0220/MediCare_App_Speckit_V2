@@ -49,29 +49,31 @@
 
 /* Button with brand gradient */
 .addBtn {
-  background: linear-gradient(135deg, var(--brand, #0f766e) 0%, #0d9488 100%);
+  background: linear-gradient(135deg, var(--brand, #0f766e) 0%, #14b8a6 100%);
   color: #ffffff;
   border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
+  padding: 10px 24px;
+  border-radius: 9999px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.15);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.01em;
 }
 
 .addBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 22px rgba(15, 118, 110, 0.35);
   filter: brightness(1.05);
 }
 
 .addBtn:active {
-  transform: translateY(1px);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.15);
 }
 
 .addBtnIcon {
@@ -411,44 +413,58 @@
 /* Actions Button Group */
 .actionsCell {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   justify-content: flex-start;
 }
 
 .actionBtn {
-  border: none;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 13px;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  padding: 6px 16px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.15s ease;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .recordBtn {
-  background-color: #f1f5f9;
-  color: #334155;
-  border: 1px solid #e2e8f0;
+  background-color: rgba(59, 130, 246, 0.06);
+  color: #2563eb;
+  border-color: rgba(59, 130, 246, 0.15);
 }
 
 .recordBtn:hover {
-  background-color: #e2e8f0;
-  color: #0f172a;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.22);
+  transform: translateY(-1.5px);
+}
+
+.recordBtn:active {
+  transform: translateY(0);
 }
 
 .bookBtn {
-  background-color: var(--brand-soft, #f0fdfa);
+  background-color: rgba(15, 118, 110, 0.06);
   color: var(--brand, #0f766e);
-  border: 1px solid #ccfbf1;
+  border-color: rgba(15, 118, 110, 0.15);
 }
 
 .bookBtn:hover {
-  background-color: var(--brand, #0f766e);
+  background: linear-gradient(135deg, var(--brand, #0f766e) 0%, #14b8a6 100%);
   color: #ffffff;
-  border-color: var(--brand, #0f766e);
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.22);
+  transform: translateY(-1.5px);
+}
+
+.bookBtn:active {
+  transform: translateY(0);
 }
 
 /* Modal Overlay & Card styling */
@@ -622,35 +638,51 @@
   background: transparent;
   border: 1px solid #cbd5e1;
   color: #475569;
-  padding: 10px 18px;
-  border-radius: 8px;
+  padding: 10px 24px;
+  border-radius: 9999px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: all 0.2s ease;
 }
 
 .cancelBtn:hover {
   background-color: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.cancelBtn:active {
+  background-color: #e2e8f0;
 }
 
 .submitBtn {
-  background-color: var(--brand, #0f766e);
+  background: linear-gradient(135deg, var(--brand, #0f766e) 0%, #14b8a6 100%);
   color: #ffffff;
   border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
+  padding: 10px 24px;
+  border-radius: 9999px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.15s;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.15);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .submitBtn:hover {
-  background-color: #0d9488;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
+  filter: brightness(1.05);
+}
+
+.submitBtn:active {
+  transform: translateY(0);
 }
 
 .submitBtn:disabled {
-  background-color: #94a3b8;
+  background: #cbd5e1;
+  color: #94a3b8;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
