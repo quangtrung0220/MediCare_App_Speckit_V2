@@ -21,6 +21,8 @@ export function buildDataSourceOptions(): DataSourceOptions {
     logging: process.env.DB_LOGGING === 'true',
   };
 
+  const isTest = process.env.NODE_ENV === 'test';
+
   if (dbType === 'postgres') {
     return {
       type: 'postgres',
@@ -37,7 +39,7 @@ export function buildDataSourceOptions(): DataSourceOptions {
   // Default: SQLite for local development
   return {
     type: 'better-sqlite3',
-    database: process.env.DB_DATABASE ?? join(process.cwd(), 'medicare.sqlite'),
+    database: isTest ? ':memory:' : (process.env.DB_DATABASE ?? join(process.cwd(), 'medicare.sqlite')),
     ...commonOptions,
   };
 }

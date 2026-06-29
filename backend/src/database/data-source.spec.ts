@@ -15,6 +15,7 @@ describe('buildDataSourceOptions', () => {
   it('should default to better-sqlite3 with medicare.sqlite', () => {
     delete process.env.DB_TYPE;
     delete process.env.DB_DATABASE;
+    delete process.env.NODE_ENV;
 
     const options = buildDataSourceOptions();
     expect(options.type).toBe('better-sqlite3');

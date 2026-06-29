@@ -1,14 +1,15 @@
 # Walkthrough: E2E Clinic Portals Implementation
 
-This walkthrough outlines the results of organizing all workspace changes into 34 structured, atomic Git commits on the review branch `feature/issue-11-nestjs-scaffold-review`, and transitioning the MediCare clinic application from prototype mock states to full E2E functionality.
+This walkthrough outlines the results of organizing all workspace changes into 35 structured, atomic Git commits on the review branch `feature/issue-11-nestjs-scaffold-review`, and transitioning the MediCare clinic application from prototype mock states to full E2E functionality.
 
 ## Segmented Commits Structure
 
 Below is the list of generated commits from the git log:
 
-1. **`57d1bd6`** `Configure global Helmet security headers and dynamic throttler rate limiting`
-2. **`a52c5ca`** `Implement Soft Delete and Restore for Patient and Appointment entities`
-3. **`98fea1e`** `Implement global validation pipes, exception filters, clinical database transactions, and audit interceptors`
+1. **`acfc213`** `Implement boot-time environment variables validation with clear installer warning logs`
+2. **`57d1bd6`** `Configure global Helmet security headers and dynamic throttler rate limiting`
+3. **`a52c5ca`** `Implement Soft Delete and Restore for Patient and Appointment entities`
+4. **`98fea1e`** `Implement global validation pipes, exception filters, clinical database transactions, and audit interceptors`
 2. **`9e6fb82`** `Expand huong_dan_debug_medicare.md with 5 concrete debugging scenarios and code solutions`
 3. **`6b2a9f9`** `Add Vietnamese troubleshooting and debugging guide huong_dan_debug_medicare.md`
 4. **`df9135c`** `Add Vietnamese functional specification document spec_tinh_nang_medicare.md to project root`
@@ -210,3 +211,10 @@ Visual verification screenshots:
 - **Dynamic API Rate Limiting**: Wired NestJS `ThrottlerModule` with `ConfigService` to dynamically load thresholds (`THROTTLE_TTL=60000` ms, `THROTTLE_LIMIT=100` requests) from environment configuration without hardcoding.
 - **Global Throttler Guard**: Bound `ThrottlerGuard` globally to automatically drop excess calls from a single IP with `429 Too Many Requests` status codes.
 - **Verification**: Verified using node script that response headers return both security indicators and throttling counters (`x-ratelimit-limit`, `x-ratelimit-remaining`) correctly.
+
+---
+
+### 12. Environment Config Validation Upgrades
+- **Class-Validator Config Schema**: Created `EnvironmentVariables` class containing data constraints (such as `PORT` must be a positive integer, `DB_TYPE` must be sqlite or postgres, etc.) using `class-validator` decorators.
+- **Boot-time validation**: Integrated validation function inside NestJS `ConfigModule.forRoot` in `DatabaseModule`, intercepting startup config loading.
+- **Installer warnings block**: Implemented formatted console message box listing each invalid variable, its constraint rules, and step-by-step fix guides in Vietnamese, exiting cleanly with `process.exit(1)` to prevent runtime crashes.

@@ -1,8 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
+import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { winstonLoggerOptions } from './config/logger.config';
 
 /**
  * Bootstrap function — application entry point.
@@ -13,7 +15,9 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
  *   - Port: PORT env variable, default 3001 (avoids conflict with Next.js on 3000)
  */
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: WinstonModule.createLogger(winstonLoggerOptions),
+  });
 
   // Global API prefix — all routes served under /api/v1/*
   app.setGlobalPrefix('api/v1');

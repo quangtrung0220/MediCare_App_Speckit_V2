@@ -1,38 +1,37 @@
-# Plan: Tích hợp Xác thực Cấu hình Môi trường (Config Validation) khi Khởi động
+# Plan: Tích hợp Hệ thống Ghi nhật ký Cấu trúc (Structured JSON Logging) bằng Winston
 
-Để ngăn ngừa máy chủ chạy ở trạng thái lỗi hoặc bị crash giữa chừng do thiếu các biến môi trường cấu hình hoặc cấu hình sai kiểu dữ liệu (như cổng PORT không phải số, định dạng DB_TYPE sai...), kế hoạch này đề xuất thiết lập cơ chế kiểm tra và xác thực cấu hình môi trường (.env) ngay khi khởi động (Boot-time Config Validation).
+Trong môi trường sản phẩm (production), việc ghi nhật ký bằng `console.log` thô rất khó truy vấn và tổng hợp. Kế hoạch này đề xuất tích hợp bộ ghi nhật ký có cấu trúc `winston` và `nest-winston` để chuẩn hóa các bản ghi dạng JSON có cấu trúc trong production (dễ dàng đẩy lên ELK, Datadog...) và định dạng màu trực quan (Colorized, Human-readable) trong môi trường local.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - **Chặn khởi động khi thiếu/sai cấu hình**: Nếu thiếu bất kỳ biến cấu hình bắt buộc nào (như `DB_TYPE`, `DB_DATABASE`, `PORT`, `CORS_ORIGIN`) hoặc sai kiểu dữ liệu, NestJS sẽ ném ra ngoại lệ và dừng quá trình khởi động máy chủ ngay lập tức. Điều này giúp phát hiện lỗi cấu hình sớm nhất có thể.
-> - **Tái sử dụng class-validator**: Tận dụng thư viện `class-validator` đã có sẵn trong dự án để định nghĩa schema xác thực cho các biến môi trường mà không cần cài đặt thêm thư viện bên ngoài (như Joi).
+> - **Chuyển đổi Logger toàn cục**: Thay thế Logger mặc định của NestJS bằng Winston Logger ở cấp độ toàn hệ thống. Mọi log khởi động, log truy cập và log lỗi hệ thống sẽ đi qua bộ lọc định dạng này.
+> - **Định dạng theo Môi trường**:
+>   * `production`: Ghi log dạng cấu trúc JSON một dòng (Single-line JSON) chứa đầy đủ thông tin: `timestamp`, `level`, `context`, `message`, `stack` (nếu có lỗi).
+>   * `development`: Ghi log định dạng màu sắc trực quan, thụt lề rõ ràng để lập trình viên dễ đọc trong quá trình debug.
 
 ---
 
 ## Proposed Changes
 
-### [Component] Backend Configuration Validation
+### [Component] Backend Structured Logger
 
-#### [NEW] [env.validation.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/config/env.validation.ts)
-- Định nghĩa lớp `EnvironmentVariables` chứa các ràng buộc xác thực:
-  * `NODE_ENV`: Bắt buộc, thuộc một trong ba giá trị `'development' | 'production' | 'test'`.
-  * `PORT`: Bắt buộc, kiểu số (`@IsNumber()`).
-  * `CORS_ORIGIN`: Bắt buộc, kiểu chuỗi (`@IsString()`).
-  * `DB_TYPE`: Bắt buộc, thuộc `'sqlite' | 'postgres'`.
-  * `DB_DATABASE`: Bắt buộc, kiểu chuỗi.
-  * `THROTTLE_TTL`: Kiểu số, mặc định 60000.
-  * `THROTTLE_LIMIT`: Kiểu số, mặc định 100.
-- Tạo hàm `validate(config)` sử dụng `plainToInstance` và `validateSync` để ép kiểu dữ liệu và kiểm tra cấu hình.
+#### [MODIFY] [package.json](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/package.json)
+- Thêm các thư viện phụ thuộc:
+  * `winston`
+  * `nest-winston`
 
-#### [MODIFY] [database.module.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/database/database.module.ts)
-- Import hàm `validate` từ `../config/env.validation`.
-- Đăng ký hàm xác thực vào `ConfigModule.forRoot`:
+#### [NEW] [logger.config.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/config/logger.config.ts)
+- Viết cấu hình Winston định dạng log động theo `NODE_ENV`:
+  * Môi trường phát triển: Dùng `winston.format.combine(winston.format.colorize(), winston.format.simple())`.
+  * Môi trường production: Dùng `winston.format.combine(winston.format.timestamp(), winston.format.json())`.
+
+#### [MODIFY] [main.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/main.ts)
+- Thay thế Logger mặc định bằng Winston Logger khi tạo ứng dụng:
   ```typescript
-  ConfigModule.forRoot({
-    isGlobal: true,
-    validate,
-  })
+  const app = await NestFactory.create(AppModule, {
+    logger: WinstonModule.createLogger(winstonLoggerOptions),
+  });
   ```
 
 ---
@@ -40,11 +39,12 @@
 ## Verification Plan
 
 ### Automated Tests
-- Đảm bảo các bài kiểm thử biên dịch và chạy thành công mà không gặp lỗi cấu hình:
+- Kiểm tra tính tương thích và đảm bảo các unit/E2E test pass bình thường:
   `npm run test`
   `npm run test:e2e`
 
 ### Manual Verification
-1. Mở file `.env` của backend, sửa biến `PORT` thành một chuỗi chữ cái (ví dụ: `PORT=not_a_number`).
-2. Khởi động backend (`npm run start`). Xác nhận hệ thống ném ra lỗi xác thực chi tiết và từ chối khởi động.
-3. Trả lại giá trị đúng cho `PORT` trong `.env` và xác nhận hệ thống khởi động bình thường.
+1. Chạy backend với `NODE_ENV=development` và quan sát định dạng log trong terminal (phải có màu sắc, định dạng dễ đọc).
+2. Chạy thử backend giả lập production: Thêm `NODE_ENV=production` vào `.env` và khởi động lại.
+3. Xác nhận tất cả log hệ thống hiển thị dưới dạng JSON một dòng, ví dụ:
+   `{"level":"info","message":"Nest application successfully started","timestamp":"2026-06-29T16:04:00.000Z","context":"NestApplication"}`

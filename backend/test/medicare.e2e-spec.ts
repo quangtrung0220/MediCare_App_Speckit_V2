@@ -20,13 +20,29 @@ describe('MediCare End-to-End API integration', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    // Fetch existing doctor and patient from seeded DB via DataSource
+    // Reset database schema cleanly for E2E isolation
     const dataSource = app.get(DataSource);
+    await dataSource.synchronize(true);
+
     const doctorRepo = dataSource.getRepository(Doctor);
     const patientRepo = dataSource.getRepository(Patient);
 
-    const doctor = await doctorRepo.findOneOrFail({ where: {} });
-    const patient = await patientRepo.findOneOrFail({ where: {} });
+    const doctor = await doctorRepo.save({
+      firstName: 'Minh',
+      lastName: 'Nguyễn',
+      specialization: 'Nội khoa',
+      licenseNumber: 'LIC-001',
+      consultationFee: 200000,
+      isAvailable: true,
+    });
+
+    const patient = await patientRepo.save({
+      firstName: 'An',
+      lastName: 'Nguyễn Văn',
+      dateOfBirth: '1990-05-15',
+      gender: 'M',
+      phone: '+84901111111',
+    });
 
     doctorId = doctor.id;
     patientId = patient.id;
