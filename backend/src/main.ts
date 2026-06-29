@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 
@@ -16,6 +17,9 @@ async function bootstrap() {
 
   // Global API prefix — all routes served under /api/v1/*
   app.setGlobalPrefix('api/v1');
+
+  // Register helmet middleware for secure HTTP response headers
+  app.use(helmet());
 
   // Global request body validation and class transformation
   app.useGlobalPipes(

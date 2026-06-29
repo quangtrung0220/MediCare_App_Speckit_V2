@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
@@ -32,6 +34,16 @@ import { AuditLogInterceptor } from './interceptors/audit-log.interceptor';
     BillingModule,
     ReportsModule,
     AuditModule,
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => [
+        {
+          ttl: configService.get<number>('THROTTLE_TTL') ? Number(configService.get('THROTTLE_TTL')) : 60000,
+          limit: configService.get<number>('THROTTLE_LIMIT') ? Number(configService.get('THROTTLE_LIMIT')) : 100,
+        },
+      ],
+    }),
   ],
   controllers: [AppController],
   providers: [
@@ -39,6 +51,10 @@ import { AuditLogInterceptor } from './interceptors/audit-log.interceptor';
     {
       provide: APP_INTERCEPTOR,
       useClass: AuditLogInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })
