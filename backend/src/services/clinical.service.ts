@@ -5,7 +5,7 @@
  */
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { MedicalRecord } from '../models/medical-record.entity';
 import { Prescription } from '../models/prescription.entity';
 import { PrescriptionItem } from '../models/prescription-item.entity';
@@ -25,22 +25,25 @@ export class ClinicalService {
     private readonly inventoryRepo: Repository<InventoryItem>,
     @InjectRepository(Appointment)
     private readonly appointmentRepo: Repository<Appointment>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async createMedicalRecord(data: Partial<MedicalRecord>): Promise<MedicalRecord> {
-    const record = this.medicalRecordRepo.create({
-      ...data,
-      visitDate: data.visitDate || new Date().toISOString().split('T')[0],
-      version: 1,
+    return this.dataSource.transaction(async (manager) => {
+      const record = manager.create(MedicalRecord, {
+        ...data,
+        visitDate: data.visitDate || new Date().toISOString().split('T')[0],
+        version: 1,
+      });
+      const saved = await manager.save(MedicalRecord, record);
+
+      // If an appointment ID is associated, mark that appointment as COMPLETED
+      if (data.appointmentId) {
+        await manager.update(Appointment, data.appointmentId, { status: 'COMPLETED' });
+      }
+
+      return saved;
     });
-    const saved = await this.medicalRecordRepo.save(record);
-
-    // If an appointment ID is associated, mark that appointment as COMPLETED
-    if (data.appointmentId) {
-      await this.appointmentRepo.update(data.appointmentId, { status: 'COMPLETED' });
-    }
-
-    return saved;
   }
 
   async getPatientHistory(patientId: string): Promise<MedicalRecord[]> {
@@ -62,36 +65,38 @@ export class ClinicalService {
     }>,
     instructions?: string,
   ): Promise<Prescription> {
-    const prescription = this.prescriptionRepo.create({
-      medicalRecordId,
-      prescribedDate: new Date().toISOString().split('T')[0],
-      status: 'PENDING',
-      instructions: instructions || '',
+    return this.dataSource.transaction(async (manager) => {
+      const prescription = manager.create(Prescription, {
+        medicalRecordId,
+        prescribedDate: new Date().toISOString().split('T')[0],
+        status: 'PENDING',
+        instructions: instructions || '',
+      });
+      const savedRx = await manager.save(Prescription, prescription);
+
+      for (const item of itemsData) {
+        // Find matching inventory item by name to get inventoryItemId
+        const invItem = await manager.findOne(InventoryItem, {
+          where: { name: item.name, isActive: true },
+        });
+
+        const rxItem = manager.create(PrescriptionItem, {
+          prescriptionId: savedRx.id,
+          inventoryItemId: invItem ? invItem.id : null,
+          dosage: item.dosage,
+          frequency: item.frequency,
+          duration: item.duration,
+          quantity: item.quantity || 10, // Default to 10 tablets/units
+          unit: invItem ? invItem.unit : 'tablet',
+        });
+        await manager.save(PrescriptionItem, rxItem);
+      }
+
+      return manager.findOne(Prescription, {
+        where: { id: savedRx.id },
+        relations: { items: true },
+      }) as Promise<Prescription>;
     });
-    const savedRx = await this.prescriptionRepo.save(prescription);
-
-    for (const item of itemsData) {
-      // Find matching inventory item by name to get inventoryItemId
-      const invItem = await this.inventoryRepo.findOne({
-        where: { name: item.name, isActive: true },
-      });
-
-      const rxItem = this.prescriptionItemRepo.create({
-        prescriptionId: savedRx.id,
-        inventoryItemId: invItem ? invItem.id : null,
-        dosage: item.dosage,
-        frequency: item.frequency,
-        duration: item.duration,
-        quantity: item.quantity || 10, // Default to 10 tablets/units
-        unit: invItem ? invItem.unit : 'tablet',
-      });
-      await this.prescriptionItemRepo.save(rxItem);
-    }
-
-    return this.prescriptionRepo.findOne({
-      where: { id: savedRx.id },
-      relations: { items: true },
-    }) as Promise<Prescription>;
   }
 
   async getPendingPrescriptions(): Promise<Prescription[]> {
@@ -106,23 +111,25 @@ export class ClinicalService {
   }
 
   async dispensePrescription(id: string): Promise<Prescription> {
-    const rx = await this.prescriptionRepo.findOne({
-      where: { id },
-      relations: { items: { inventoryItem: true } },
-    });
-    if (!rx) throw new NotFoundException(`Prescription ${id} not found`);
-    if (rx.status === 'DISPENSED') throw new ConflictException(`Prescription already dispensed`);
+    return this.dataSource.transaction(async (manager) => {
+      const rx = await manager.findOne(Prescription, {
+        where: { id },
+        relations: { items: { inventoryItem: true } },
+      });
+      if (!rx) throw new NotFoundException(`Prescription ${id} not found`);
+      if (rx.status === 'DISPENSED') throw new ConflictException(`Prescription already dispensed`);
 
-    // Reduce stock quantities
-    for (const item of rx.items) {
-      if (item.inventoryItemId && item.inventoryItem) {
-        const currentQty = item.inventoryItem.quantity;
-        const newQty = Math.max(0, currentQty - item.quantity);
-        await this.inventoryRepo.update(item.inventoryItemId, { quantity: newQty });
+      // Reduce stock quantities
+      for (const item of rx.items) {
+        if (item.inventoryItemId && item.inventoryItem) {
+          const currentQty = item.inventoryItem.quantity;
+          const newQty = Math.max(0, currentQty - item.quantity);
+          await manager.update(InventoryItem, item.inventoryItemId, { quantity: newQty });
+        }
       }
-    }
 
-    rx.status = 'DISPENSED';
-    return this.prescriptionRepo.save(rx);
+      rx.status = 'DISPENSED';
+      return manager.save(Prescription, rx);
+    });
   }
 }

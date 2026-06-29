@@ -18,6 +18,8 @@ import {
 } from '@nestjs/common';
 import { AppointmentService } from '../services/appointment.service';
 import { Appointment } from '../models/appointment.entity';
+import { CreateAppointmentDto } from '../appointment/dto/create-appointment.dto';
+import { UpdateAppointmentDto } from '../appointment/dto/update-appointment.dto';
 
 @Controller('appointments')
 export class AppointmentController {
@@ -55,14 +57,14 @@ export class AppointmentController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() data: Partial<Appointment>): Promise<Appointment> {
+  async create(@Body() data: CreateAppointmentDto): Promise<Appointment> {
     return this.appointmentService.create(data);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() data: Partial<Appointment>,
+    @Body() data: UpdateAppointmentDto,
   ): Promise<Appointment> {
     return this.appointmentService.update(id, data);
   }

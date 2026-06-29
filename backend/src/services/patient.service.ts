@@ -7,6 +7,8 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { PATIENT_REPOSITORY } from './contracts';
 import type { IPatientRepository } from './contracts';
 import { Patient } from '../models/patient.entity';
+import { CreatePatientDto } from '../patient/dto/create-patient.dto';
+import { UpdatePatientDto } from '../patient/dto/update-patient.dto';
 
 @Injectable()
 export class PatientService {
@@ -25,11 +27,11 @@ export class PatientService {
     return patient;
   }
 
-  async create(data: Partial<Patient>): Promise<Patient> {
+  async create(data: CreatePatientDto): Promise<Patient> {
     return this.patientRepo.create(data);
   }
 
-  async update(id: string, data: Partial<Patient>): Promise<Patient> {
+  async update(id: string, data: UpdatePatientDto): Promise<Patient> {
     const updated = await this.patientRepo.update(id, data);
     if (!updated) throw new NotFoundException(`Patient ${id} not found`);
     return updated;

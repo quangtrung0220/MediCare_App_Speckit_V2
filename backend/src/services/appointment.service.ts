@@ -7,6 +7,8 @@ import { Injectable, Inject, NotFoundException, ConflictException } from '@nestj
 import { APPOINTMENT_REPOSITORY } from './contracts';
 import type { IAppointmentRepository } from './contracts';
 import { Appointment } from '../models/appointment.entity';
+import { CreateAppointmentDto } from '../appointment/dto/create-appointment.dto';
+import { UpdateAppointmentDto } from '../appointment/dto/update-appointment.dto';
 
 @Injectable()
 export class AppointmentService {
@@ -25,7 +27,7 @@ export class AppointmentService {
     return apt;
   }
 
-  async create(data: Partial<Appointment>): Promise<Appointment> {
+  async create(data: CreateAppointmentDto): Promise<Appointment> {
     // Check for conflicting appointments
     if (data.doctorId && data.appointmentDate && data.appointmentTime) {
       const conflict = await this.appointmentRepo.findConflicting(
@@ -41,7 +43,7 @@ export class AppointmentService {
     return this.appointmentRepo.create(data);
   }
 
-  async update(id: string, data: Partial<Appointment>): Promise<Appointment> {
+  async update(id: string, data: UpdateAppointmentDto): Promise<Appointment> {
     const updated = await this.appointmentRepo.update(id, data);
     if (!updated) throw new NotFoundException(`Appointment ${id} not found`);
     return updated;
