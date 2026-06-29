@@ -129,6 +129,9 @@ The Patients portal has been visually redesigned with a focus on details:
 - Dual-filtering drop-downs.
 - Modern **capsule-shaped buttons** with glowing gradients, glowing outline borders, shadow offsets, and scaling hover micro-animations (`addBtn`, `recordBtn`, `bookBtn`, `cancelBtn`, `submitBtn`).
 - Custom backdrop blurred patient registration modal form.
+- **Ràng buộc trường dữ liệu thời gian thực (Inline Input Validation & Help Guidelines)**: 
+  * Dưới mỗi ô nhập liệu có hiển thị các ghi chú hướng dẫn định dạng mờ (ví dụ: *"Tối thiểu 2 ký tự, không chứa số"*, *"Định dạng 10 số..."*).
+  * Khi người dùng nhập sai, ô nhập liệu sẽ chuyển sang viền đỏ (`inputError`) và hiển thị thông báo lỗi chi tiết thay thế cho hướng dẫn, giúp người dùng nhận biết ngay lập tức lỗi sai ở trường nào mà không cần gửi biểu mẫu lên máy chủ.
 
 #### Mobile View & Layout Responsiveness
 - Action buttons have `white-space: nowrap` configured globally, eliminating vertical text splitting or double-line wrapping.
