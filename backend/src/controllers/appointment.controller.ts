@@ -84,4 +84,9 @@ export class AppointmentController {
   async delete(@Param('id') id: string): Promise<void> {
     return this.appointmentService.delete(id);
   }
+
+  @Patch(':id/restore')
+  async restore(@Param('id') id: string): Promise<void> {
+    return this.appointmentService.restore(id);
+  }
 }

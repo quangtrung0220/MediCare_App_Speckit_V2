@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Delete,
+  Patch,
   Param,
   Body,
   Query,
@@ -67,5 +68,10 @@ export class PatientController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id') id: string): Promise<void> {
     return this.patientService.delete(id);
+  }
+
+  @Patch(':id/restore')
+  async restore(@Param('id') id: string): Promise<void> {
+    return this.patientService.restore(id);
   }
 }

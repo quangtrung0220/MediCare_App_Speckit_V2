@@ -75,6 +75,14 @@ export class AppointmentService {
     if (!deleted) throw new NotFoundException(`Appointment ${id} not found`);
   }
 
+  async restore(id: string): Promise<void> {
+    if (!this.appointmentRepo.restore) {
+      throw new Error('Restore method not supported on Appointment Repository');
+    }
+    const restored = await this.appointmentRepo.restore(id);
+    if (!restored) throw new NotFoundException(`Appointment ${id} not found`);
+  }
+
   async findByPatient(patientId: string): Promise<Appointment[]> {
     return this.appointmentRepo.findByPatientId(patientId);
   }

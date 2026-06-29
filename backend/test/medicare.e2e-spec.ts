@@ -76,16 +76,37 @@ describe('MediCare End-to-End API integration', () => {
 
       expect(response.body.firstName).toBe('Văn B');
     });
+
+    it('DELETE /patients/:id - should soft-delete the patient and reject subsequent GETs with 404', async () => {
+      await request(app.getHttpServer())
+        .delete(`/patients/${createdPatientId}`)
+        .expect(204);
+
+      await request(app.getHttpServer())
+        .get(`/patients/${createdPatientId}`)
+        .expect(404);
+    });
+
+    it('PATCH /patients/:id/restore - should restore the patient and allow GETs again', async () => {
+      await request(app.getHttpServer())
+        .patch(`/patients/${createdPatientId}/restore`)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get(`/patients/${createdPatientId}`)
+        .expect(200);
+    });
   });
 
   describe('Appointments Endpoint (/appointments)', () => {
     it('POST /appointments - should book a slot successfully', async () => {
+      const randomDay = String(Math.floor(Math.random() * 25) + 1).padStart(2, '0');
       const response = await request(app.getHttpServer())
         .post('/appointments')
         .send({
           doctorId,
           patientId,
-          appointmentDate: '2026-07-01',
+          appointmentDate: `2026-08-${randomDay}`,
           appointmentTime: '09:00',
           durationMinutes: 30,
           status: 'SCHEDULED',
@@ -97,13 +118,15 @@ describe('MediCare End-to-End API integration', () => {
     });
 
     it('POST /appointments - booking same doctor at same time should trigger conflict', async () => {
+      const randomDay = String(Math.floor(Math.random() * 25) + 1).padStart(2, '0');
+      const appointmentDate = `2026-09-${randomDay}`;
       // First booking
       await request(app.getHttpServer())
         .post('/appointments')
         .send({
           doctorId,
           patientId,
-          appointmentDate: '2026-07-02',
+          appointmentDate,
           appointmentTime: '10:00',
           status: 'SCHEDULED',
         })
@@ -115,7 +138,7 @@ describe('MediCare End-to-End API integration', () => {
         .send({
           doctorId,
           patientId,
-          appointmentDate: '2026-07-02',
+          appointmentDate,
           appointmentTime: '10:00',
           status: 'SCHEDULED',
         })

@@ -41,7 +41,12 @@ export class PatientRepository implements IPatientRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.repo.delete(id);
+    const result = await this.repo.softDelete(id);
+    return (result.affected ?? 0) > 0;
+  }
+
+  async restore(id: string): Promise<boolean> {
+    const result = await this.repo.restore(id);
     return (result.affected ?? 0) > 0;
   }
 

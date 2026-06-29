@@ -42,6 +42,14 @@ export class PatientService {
     if (!deleted) throw new NotFoundException(`Patient ${id} not found`);
   }
 
+  async restore(id: string): Promise<void> {
+    if (!this.patientRepo.restore) {
+      throw new Error('Restore method not supported on Patient Repository');
+    }
+    const restored = await this.patientRepo.restore(id);
+    if (!restored) throw new NotFoundException(`Patient ${id} not found`);
+  }
+
   async search(query: string): Promise<Patient[]> {
     return this.patientRepo.search(query);
   }
