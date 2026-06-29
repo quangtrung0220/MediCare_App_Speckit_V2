@@ -1,12 +1,13 @@
 # Walkthrough: E2E Clinic Portals Implementation
 
-This walkthrough outlines the results of organizing all workspace changes into 32 structured, atomic Git commits on the review branch `feature/issue-11-nestjs-scaffold-review`, and transitioning the MediCare clinic application from prototype mock states to full E2E functionality.
+This walkthrough outlines the results of organizing all workspace changes into 33 structured, atomic Git commits on the review branch `feature/issue-11-nestjs-scaffold-review`, and transitioning the MediCare clinic application from prototype mock states to full E2E functionality.
 
 ## Segmented Commits Structure
 
 Below is the list of generated commits from the git log:
 
-1. **`98fea1e`** `Implement global validation pipes, exception filters, clinical database transactions, and audit interceptors`
+1. **`a52c5ca`** `Implement Soft Delete and Restore for Patient and Appointment entities`
+2. **`98fea1e`** `Implement global validation pipes, exception filters, clinical database transactions, and audit interceptors`
 2. **`9e6fb82`** `Expand huong_dan_debug_medicare.md with 5 concrete debugging scenarios and code solutions`
 3. **`6b2a9f9`** `Add Vietnamese troubleshooting and debugging guide huong_dan_debug_medicare.md`
 4. **`df9135c`** `Add Vietnamese functional specification document spec_tinh_nang_medicare.md to project root`
@@ -189,3 +190,14 @@ Visual verification screenshots:
 - **Global Pipes & Filters**: Configured NestJS global `ValidationPipe` to enforce validations, and `HttpExceptionFilter` to format exceptions into a unified JSON format.
 - **Database Transactions**: Wrapped write operations in `ClinicalService` within a unified TypeORM database transaction runner.
 - **Audit interceptor**: Bound global `AuditLogInterceptor` to automatically track and insert log actions on patients, appointments, billing, EMR and inventory entities.
+
+---
+
+### 10. Soft Delete & Restore Upgrades
+- **Delete Date Column**: Integrated `@DeleteDateColumn` in both `Patient` and `Appointment` entities.
+- **Base Repository Upgrades**: Enhanced generic `IBaseRepository<T>` to expose optional `restore` signatures.
+- **TypeORM Soft Delete**: Configured `PatientRepository` and `AppointmentRepository` to execute `softDelete` and `restore` queries.
+- **Restore REST Endpoints**: Implemented and registered PATCH endpoints:
+  * `PATCH /api/v1/patients/:id/restore`
+  * `PATCH /api/v1/appointments/:id/restore`
+- **Validation**: Added comprehensive E2E integration test cases validating that deletion successfully marks the record, hides it from normal retrieval queries (returns 404), and restore successfully exposes it again (returns 200).
