@@ -2,8 +2,16 @@ import { IsString, IsNotEmpty, IsOptional, IsDateString } from 'class-validator'
 
 export class CreatePatientDto {
   @IsString()
-  @IsNotEmpty({ message: 'Tên bệnh nhân không được để trống' })
-  name: string;
+  @IsNotEmpty({ message: 'Họ không được để trống' })
+  lastName: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Tên không được để trống' })
+  firstName: string;
+
+  @IsString()
+  @IsOptional()
+  email?: string;
 
   @IsString()
   @IsNotEmpty({ message: 'Giới tính không được để trống' })

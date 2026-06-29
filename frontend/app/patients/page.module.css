@@ -783,3 +783,21 @@
   }
 }
 
+.inputError {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08) !important;
+}
+
+.fieldHelper {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.fieldError {
+  font-size: 11px;
+  color: #ef4444;
+  font-weight: 500;
+  margin-top: 1px;
+}
+

@@ -45,6 +45,7 @@ export default function PatientsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Stats computation
   const totalCount = patients.length;
@@ -78,28 +79,75 @@ export default function PatientsPage() {
     return name.slice(0, 2).toUpperCase();
   };
 
+  const validateField = (name: string, value: string): string => {
+    let error = "";
+    if (name === "lastName") {
+      if (!value.trim()) {
+        error = "Họ không được để trống";
+      } else if (value.trim().length < 2) {
+        error = "Họ phải chứa ít nhất 2 ký tự";
+      } else if (/[0-9]/.test(value)) {
+        error = "Họ không được chứa chữ số";
+      }
+    } else if (name === "firstName") {
+      if (!value.trim()) {
+        error = "Tên không được để trống";
+      } else if (value.trim().length < 2) {
+        error = "Tên phải chứa ít nhất 2 ký tự";
+      } else if (/[0-9]/.test(value)) {
+        error = "Tên không được chứa chữ số";
+      }
+    } else if (name === "phone") {
+      const phoneRegex = /^(0|\+84)[35789][0-9]{8}$/;
+      if (!value.trim()) {
+        error = "Số điện thoại không được để trống";
+      } else if (!phoneRegex.test(value.trim())) {
+        error = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0 hoặc +84)";
+      }
+    } else if (name === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (value.trim() && !emailRegex.test(value.trim())) {
+        error = "Địa chỉ email không đúng định dạng (ví dụ: ten@domain.com)";
+      }
+    } else if (name === "dateOfBirth") {
+      if (!value) {
+        error = "Vui lòng chọn ngày sinh";
+      } else {
+        const selectedDate = new Date(value);
+        const today = new Date();
+        if (selectedDate > today) {
+          error = "Ngày sinh phải là một ngày trong quá khứ";
+        }
+      }
+    }
+    setFieldErrors((prev) => ({ ...prev, [name]: error }));
+    return error;
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
     
-    // Simple Validation
-    if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      setFormError("Họ và tên không được để trống.");
-      return;
-    }
-    if (!formData.dateOfBirth) {
-      setFormError("Vui lòng chọn ngày sinh.");
-      return;
-    }
-    if (!formData.phone.trim()) {
-      setFormError("Số điện thoại không được để trống.");
+    // Validate all fields
+    const errors: Record<string, string> = {
+      lastName: validateField("lastName", formData.lastName),
+      firstName: validateField("firstName", formData.firstName),
+      dateOfBirth: validateField("dateOfBirth", formData.dateOfBirth),
+      phone: validateField("phone", formData.phone),
+      email: validateField("email", formData.email),
+    };
+
+    const hasError = Object.values(errors).some((err) => err !== "");
+    if (hasError) {
+      setFormError("Vui lòng kiểm tra và sửa lại các lỗi dữ liệu bên dưới.");
       return;
     }
 
@@ -116,6 +164,7 @@ export default function PatientsPage() {
 
       setSuccessMessage("Đăng ký bệnh nhân thành công!");
       setFormData(INITIAL_FORM_DATA);
+      setFieldErrors({});
       await refetch();
 
       setTimeout(() => {
@@ -371,12 +420,17 @@ export default function PatientsPage() {
                     type="text"
                     name="lastName"
                     required
-                    className={styles.formInput}
+                    className={`${styles.formInput} ${fieldErrors.lastName ? styles.inputError : ""}`}
                     placeholder="Ví dụ: Nguyễn"
                     value={formData.lastName}
                     onChange={handleInputChange}
                     disabled={isSaving}
                   />
+                  {fieldErrors.lastName ? (
+                    <span className={styles.fieldError}>{fieldErrors.lastName}</span>
+                  ) : (
+                    <span className={styles.fieldHelper}>Tối thiểu 2 ký tự, không chứa số</span>
+                  )}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -385,12 +439,17 @@ export default function PatientsPage() {
                     type="text"
                     name="firstName"
                     required
-                    className={styles.formInput}
+                    className={`${styles.formInput} ${fieldErrors.firstName ? styles.inputError : ""}`}
                     placeholder="Ví dụ: Văn A"
                     value={formData.firstName}
                     onChange={handleInputChange}
                     disabled={isSaving}
                   />
+                  {fieldErrors.firstName ? (
+                    <span className={styles.fieldError}>{fieldErrors.firstName}</span>
+                  ) : (
+                    <span className={styles.fieldHelper}>Tối thiểu 2 ký tự, không chứa số</span>
+                  )}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -399,11 +458,16 @@ export default function PatientsPage() {
                     type="date"
                     name="dateOfBirth"
                     required
-                    className={styles.formInput}
+                    className={`${styles.formInput} ${fieldErrors.dateOfBirth ? styles.inputError : ""}`}
                     value={formData.dateOfBirth}
                     onChange={handleInputChange}
                     disabled={isSaving}
                   />
+                  {fieldErrors.dateOfBirth ? (
+                    <span className={styles.fieldError}>{fieldErrors.dateOfBirth}</span>
+                  ) : (
+                    <span className={styles.fieldHelper}>Ngày sinh trong quá khứ</span>
+                  )}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -419,6 +483,7 @@ export default function PatientsPage() {
                     <option value="F">Nữ</option>
                     <option value="Other">Khác</option>
                   </select>
+                  <span className={styles.fieldHelper}>Chọn giới tính sinh học</span>
                 </div>
 
                 <div className={styles.formGroup}>
@@ -427,12 +492,17 @@ export default function PatientsPage() {
                     type="tel"
                     name="phone"
                     required
-                    className={styles.formInput}
+                    className={`${styles.formInput} ${fieldErrors.phone ? styles.inputError : ""}`}
                     placeholder="Ví dụ: 0901234567"
                     value={formData.phone}
                     onChange={handleInputChange}
                     disabled={isSaving}
                   />
+                  {fieldErrors.phone ? (
+                    <span className={styles.fieldError}>{fieldErrors.phone}</span>
+                  ) : (
+                    <span className={styles.fieldHelper}>Định dạng 10 số (03/05/07/08/09...) hoặc +84</span>
+                  )}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -440,12 +510,17 @@ export default function PatientsPage() {
                   <input
                     type="email"
                     name="email"
-                    className={styles.formInput}
+                    className={`${styles.formInput} ${fieldErrors.email ? styles.inputError : ""}`}
                     placeholder="Ví dụ: email@gmail.com"
                     value={formData.email}
                     onChange={handleInputChange}
                     disabled={isSaving}
                   />
+                  {fieldErrors.email ? (
+                    <span className={styles.fieldError}>{fieldErrors.email}</span>
+                  ) : (
+                    <span className={styles.fieldHelper}>Địa chỉ email hợp lệ (tùy chọn)</span>
+                  )}
                 </div>
               </div>
 

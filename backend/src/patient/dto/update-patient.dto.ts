@@ -3,7 +3,15 @@ import { IsString, IsOptional, IsDateString } from 'class-validator';
 export class UpdatePatientDto {
   @IsString()
   @IsOptional()
-  name?: string;
+  lastName?: string;
+
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @IsString()
+  @IsOptional()
+  email?: string;
 
   @IsString()
   @IsOptional()

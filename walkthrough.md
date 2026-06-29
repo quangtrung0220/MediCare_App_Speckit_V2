@@ -1,42 +1,43 @@
 # Walkthrough: E2E Clinic Portals Implementation
 
-This walkthrough outlines the results of organizing all workspace changes into 31 structured, atomic Git commits on the review branch `feature/issue-11-nestjs-scaffold-review`, and transitioning the MediCare clinic application from prototype mock states to full E2E functionality.
+This walkthrough outlines the results of organizing all workspace changes into 32 structured, atomic Git commits on the review branch `feature/issue-11-nestjs-scaffold-review`, and transitioning the MediCare clinic application from prototype mock states to full E2E functionality.
 
 ## Segmented Commits Structure
 
 Below is the list of generated commits from the git log:
 
-1. **`9e6fb82`** `Expand huong_dan_debug_medicare.md with 5 concrete debugging scenarios and code solutions`
-2. **`6b2a9f9`** `Add Vietnamese troubleshooting and debugging guide huong_dan_debug_medicare.md`
-3. **`df9135c`** `Add Vietnamese functional specification document spec_tinh_nang_medicare.md to project root`
-4. **`454cb7d`** `Fix doctor encounter page header translation from lâm nghiệp to lâm sàng`
-5. **`2ad1247`** `Implement dynamic SVG charts on Overview and Reports pages, add sidebar icons, and align component tests`
-6. **`d6a1991`** `Unify typography globally with Plus Jakarta Sans and set font controls inheritance`
-7. **`45aa5e7`** `Seed default E2E sample medical records, prescriptions, payments, and appointments`
-8. **`49b3d12`** `Implement mobile responsive collapsing cards for patients table and add white-space nowrap to buttons`
-9. **`4c9f25a`** `Redesign buttons to capsule-shaped layout with glowing gradient and hover scaling animations`
-10. **`21d5af7`** `Redesign Patients Portal page layout with summary metrics, filter controls, data tables, and addition form modal`
-11. **`6d9cf7d`** `Design modern premium table and list styles in globals.css`
-12. **`920cb8c`** `Integrate Next.js frontend services and dashboard widgets with real backend REST APIs`
-13. **`c6eb23d`** `Backend REST Controllers and services for Inventory, Billing, Reports, and Audit modules`
-14. **`ba6dbc8`** `Backend REST Controllers and services for Doctor and Clinical modules`
-15. **`8462c2c`** `Fix doctor portal encounter prescription duration format and status syncing`
-16. **`83278f8`** `Fix backend typeorm and isolatedModules compiler errors`
-17. **`4005c24`** `Frontend Mock Data, Core Hooks, and Test Suites`
-18. **`b33d9f9`** `Billing, Reports, Privacy Settings, and Admin/Audit Portals`
-19. **`6afb4ab`** `Master Directories (Appointments, EMR, Prescriptions)`
-20. **`41558b0`** `Overview Landing Dashboard Upgrade`
-21. **`b48d6dd`** `Pharmacist Dispense Queue & Inventory Management Screen`
-22. **`42fb625`** `Doctor Encounter Workspace & Clinical Decision Support Screen`
-23. **`67dbef3`** `Nurse Vitals Intake Workspace Screen`
-24. **`7052ee4`** `Receptionist Check-in and Patient Intake Screen`
-25. **`6ce010d`** `Patient Dashboard & Appointment Booking Flow`
-26. **`d5b2889`** `Frontend Theme, AppShell Layout and Sidebar Navigation Cleanup`
-27. **`1bfc157`** `Backend REST Controllers, Guards, and Domain Services`
-28. **`dea34f6`** `Backend Domain Database and ORM Entities Setup`
-29. **`11cbeff`** `NestJS Backend Initial Scaffold`
-30. **`f5ab612`** `Root and Build Config Improvements`
-31. **`75b32be`** `Setup & Spec Documentation`
+1. **`98fea1e`** `Implement global validation pipes, exception filters, clinical database transactions, and audit interceptors`
+2. **`9e6fb82`** `Expand huong_dan_debug_medicare.md with 5 concrete debugging scenarios and code solutions`
+3. **`6b2a9f9`** `Add Vietnamese troubleshooting and debugging guide huong_dan_debug_medicare.md`
+4. **`df9135c`** `Add Vietnamese functional specification document spec_tinh_nang_medicare.md to project root`
+5. **`454cb7d`** `Fix doctor encounter page header translation from lâm nghiệp to lâm sàng`
+6. **`2ad1247`** `Implement dynamic SVG charts on Overview and Reports pages, add sidebar icons, and align component tests`
+7. **`d6a1991`** `Unify typography globally with Plus Jakarta Sans and set font controls inheritance`
+8. **`45aa5e7`** `Seed default E2E sample medical records, prescriptions, payments, and appointments`
+9. **`49b3d12`** `Implement mobile responsive collapsing cards for patients table and add white-space nowrap to buttons`
+10. **`4c9f25a`** `Redesign buttons to capsule-shaped layout with glowing gradient and hover scaling animations`
+11. **`21d5af7`** `Redesign Patients Portal page layout with summary metrics, filter controls, data tables, and addition form modal`
+12. **`6d9cf7d`** `Design modern premium table and list styles in globals.css`
+13. **`920cb8c`** `Integrate Next.js frontend services and dashboard widgets with real backend REST APIs`
+14. **`c6eb23d`** `Backend REST Controllers and services for Inventory, Billing, Reports, and Audit modules`
+15. **`ba6dbc8`** `Backend REST Controllers and services for Doctor and Clinical modules`
+16. **`8462c2c`** `Fix doctor portal encounter prescription duration format and status syncing`
+17. **`83278f8`** `Fix backend typeorm and isolatedModules compiler errors`
+18. **`4005c24`** `Frontend Mock Data, Core Hooks, and Test Suites`
+19. **`b33d9f9`** `Billing, Reports, Privacy Settings, and Admin/Audit Portals`
+20. **`6afb4ab`** `Master Directories (Appointments, EMR, Prescriptions)`
+21. **`41558b0`** `Overview Landing Dashboard Upgrade`
+22. **`b48d6dd`** `Pharmacist Dispense Queue & Inventory Management Screen`
+23. **`42fb625`** `Doctor Encounter Workspace & Clinical Decision Support Screen`
+24. **`67dbef3`** `Nurse Vitals Intake Workspace Screen`
+25. **`7052ee4`** `Receptionist Check-in and Patient Intake Screen`
+26. **`6ce010d`** `Patient Dashboard & Appointment Booking Flow`
+27. **`d5b2889`** `Frontend Theme, AppShell Layout and Sidebar Navigation Cleanup`
+28. **`1bfc157`** `Backend REST Controllers, Guards, and Domain Services`
+29. **`dea34f6`** `Backend Domain Database and ORM Entities Setup`
+30. **`11cbeff`** `NestJS Backend Initial Scaffold`
+31. **`f5ab612`** `Root and Build Config Improvements`
+32. **`75b32be`** `Setup & Spec Documentation`
 
 ---
 
@@ -177,3 +178,11 @@ Visual verification screenshots:
 ### 8. Functional Specification and Debugging Guides
 - **spec_tinh_nang_medicare.md**: A comprehensive Vietnamese specification document details features and E2E mechanics for all 18 clinical interfaces.
 - **huong_dan_debug_medicare.md**: A detailed Vietnamese debugging and troubleshooting guide details console logging, database resets, mock fallback mechanisms, and diagnostic tips for all portals. Includes 5 concrete debugging scenario walkthroughs with source code solutions.
+
+---
+
+### 9. NestJS Backend Validation & Audit Log Upgrades
+- **class-validator DTOs**: Created DTO classes (`CreatePatientDto`, `UpdatePatientDto`, `CreateAppointmentDto`, `UpdateAppointmentDto`) restricting endpoint properties.
+- **Global Pipes & Filters**: Configured NestJS global `ValidationPipe` to enforce validations, and `HttpExceptionFilter` to format exceptions into a unified JSON format.
+- **Database Transactions**: Wrapped write operations in `ClinicalService` within a unified TypeORM database transaction runner.
+- **Audit interceptor**: Bound global `AuditLogInterceptor` to automatically track and insert log actions on patients, appointments, billing, EMR and inventory entities.
