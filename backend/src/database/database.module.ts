@@ -1,16 +1,15 @@
-/*
- * Created: 2026-06-24
- * Purpose: NestJS DatabaseModule that registers TypeORM with env-driven config.
- * Owner: Quang Trung
- */
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { buildDataSourceOptions } from './data-source';
+import { validate } from '../config/env.validation';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate,
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

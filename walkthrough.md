@@ -1,13 +1,14 @@
 # Walkthrough: E2E Clinic Portals Implementation
 
-This walkthrough outlines the results of organizing all workspace changes into 33 structured, atomic Git commits on the review branch `feature/issue-11-nestjs-scaffold-review`, and transitioning the MediCare clinic application from prototype mock states to full E2E functionality.
+This walkthrough outlines the results of organizing all workspace changes into 34 structured, atomic Git commits on the review branch `feature/issue-11-nestjs-scaffold-review`, and transitioning the MediCare clinic application from prototype mock states to full E2E functionality.
 
 ## Segmented Commits Structure
 
 Below is the list of generated commits from the git log:
 
-1. **`a52c5ca`** `Implement Soft Delete and Restore for Patient and Appointment entities`
-2. **`98fea1e`** `Implement global validation pipes, exception filters, clinical database transactions, and audit interceptors`
+1. **`57d1bd6`** `Configure global Helmet security headers and dynamic throttler rate limiting`
+2. **`a52c5ca`** `Implement Soft Delete and Restore for Patient and Appointment entities`
+3. **`98fea1e`** `Implement global validation pipes, exception filters, clinical database transactions, and audit interceptors`
 2. **`9e6fb82`** `Expand huong_dan_debug_medicare.md with 5 concrete debugging scenarios and code solutions`
 3. **`6b2a9f9`** `Add Vietnamese troubleshooting and debugging guide huong_dan_debug_medicare.md`
 4. **`df9135c`** `Add Vietnamese functional specification document spec_tinh_nang_medicare.md to project root`
@@ -201,3 +202,11 @@ Visual verification screenshots:
   * `PATCH /api/v1/patients/:id/restore`
   * `PATCH /api/v1/appointments/:id/restore`
 - **Validation**: Added comprehensive E2E integration test cases validating that deletion successfully marks the record, hides it from normal retrieval queries (returns 404), and restore successfully exposes it again (returns 200).
+
+---
+
+### 11. Rate Limiting & Helmet Security Upgrades
+- **Helmet Headers Integration**: Registered global `helmet` middleware in `main.ts` to automatically inject defense HTTP headers (`X-Frame-Options`, `X-Content-Type-Options: nosniff`, `Strict-Transport-Security`, etc.) preventing clickjacking and MIME-sniffing exploits.
+- **Dynamic API Rate Limiting**: Wired NestJS `ThrottlerModule` with `ConfigService` to dynamically load thresholds (`THROTTLE_TTL=60000` ms, `THROTTLE_LIMIT=100` requests) from environment configuration without hardcoding.
+- **Global Throttler Guard**: Bound `ThrottlerGuard` globally to automatically drop excess calls from a single IP with `429 Too Many Requests` status codes.
+- **Verification**: Verified using node script that response headers return both security indicators and throttling counters (`x-ratelimit-limit`, `x-ratelimit-remaining`) correctly.
