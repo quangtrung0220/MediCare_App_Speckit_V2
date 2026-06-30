@@ -14,6 +14,7 @@ import {
 } from 'typeorm';
 import { Patient } from './patient.entity';
 import { Doctor } from './doctor.entity';
+import { EncryptionTransformer } from '../database/transformers/encryption.transformer';
 
 @Entity('medical_records')
 export class MedicalRecord {
@@ -40,13 +41,13 @@ export class MedicalRecord {
   @Column({ type: 'varchar', length: 10 })
   visitDate: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, transformer: new EncryptionTransformer() })
   symptoms: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, transformer: new EncryptionTransformer() })
   diagnosis: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, transformer: new EncryptionTransformer() })
   treatment: string | null;
 
   @Column({ type: 'text', nullable: true })

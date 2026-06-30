@@ -1,37 +1,49 @@
-# Plan: Tích hợp Hệ thống Ghi nhật ký Cấu trúc (Structured JSON Logging) bằng Winston
+# Plan: Tích hợp Mã hóa Dữ liệu Nhạy cảm (Encryption at Rest) bằng AES-256
 
-Trong môi trường sản phẩm (production), việc ghi nhật ký bằng `console.log` thô rất khó truy vấn và tổng hợp. Kế hoạch này đề xuất tích hợp bộ ghi nhật ký có cấu trúc `winston` và `nest-winston` để chuẩn hóa các bản ghi dạng JSON có cấu trúc trong production (dễ dàng đẩy lên ELK, Datadog...) và định dạng màu trực quan (Colorized, Human-readable) trong môi trường local.
+Trong phần mềm y tế, việc bảo mật hồ sơ bệnh án (sự kiện, chẩn đoán, điều trị...) và thông tin cá nhân của bệnh nhân (số điện thoại, địa chỉ) là bắt buộc (theo tiêu chuẩn bảo mật y tế như HIPAA/GDPR). Kế hoạch này đề xuất tích hợp cơ chế mã hóa trong suốt (Transparent Encryption/Decryption) tại tầng TypeORM bằng thuật toán **AES-256-CBC** sử dụng thư viện `crypto` tích hợp sẵn của Node.js.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - **Chuyển đổi Logger toàn cục**: Thay thế Logger mặc định của NestJS bằng Winston Logger ở cấp độ toàn hệ thống. Mọi log khởi động, log truy cập và log lỗi hệ thống sẽ đi qua bộ lọc định dạng này.
-> - **Định dạng theo Môi trường**:
->   * `production`: Ghi log dạng cấu trúc JSON một dòng (Single-line JSON) chứa đầy đủ thông tin: `timestamp`, `level`, `context`, `message`, `stack` (nếu có lỗi).
->   * `development`: Ghi log định dạng màu sắc trực quan, thụt lề rõ ràng để lập trình viên dễ đọc trong quá trình debug.
+> - **Mã hóa trong suốt (Transparent Encryption)**: Quá trình mã hóa khi lưu và giải mã khi đọc diễn ra hoàn toàn tự động ở tầng Database ORM. Các dịch vụ (`ClinicalService`, `PatientService`) và cổng giao diện (Frontend) không cần thay đổi code xử lý chuỗi.
+> - **Các trường dữ liệu sẽ mã hóa**:
+>   * Bệnh án (`MedicalRecord`): `symptoms` (triệu chứng), `diagnosis` (chẩn đoán), `treatment` (hướng điều trị).
+>   * Bệnh nhân (`Patient`): `phone` (số điện thoại), `address` (địa chỉ).
+> - **Biến môi trường khóa mã hóa (`ENCRYPTION_KEY`)**: Cần đăng ký một khóa bí mật trong tệp `.env`. Nếu thay đổi khóa này, dữ liệu cũ đã mã hóa sẽ không thể giải mã được (hệ thống sẽ tự động fallback trả về dữ liệu mã hóa gốc để tránh crash).
 
 ---
 
 ## Proposed Changes
 
-### [Component] Backend Structured Logger
+### [Component] Database Encryption Layer
 
-#### [MODIFY] [package.json](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/package.json)
-- Thêm các thư viện phụ thuộc:
-  * `winston`
-  * `nest-winston`
+#### [NEW] [encryption.transformer.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/database/transformers/encryption.transformer.ts)
+- Định nghĩa class `EncryptionTransformer` kế thừa `ValueTransformer` của TypeORM:
+  * Phương thức `to()`: Mã hóa dữ liệu trước khi lưu vào DB bằng thuật toán AES-256-CBC, sử dụng một chuỗi Vector khởi tạo ngẫu nhiên (IV - Initialization Vector) mỗi lần mã hóa và nối ghép theo định dạng `iv:encryptedText`.
+  * Phương thức `from()`: Tách chuỗi dạng `iv:encryptedText`, giải mã ngược lại thành văn bản gốc.
+  * Tự động fallback trả về dữ liệu thô nếu phát hiện dữ liệu chưa được mã hóa trước đó hoặc giải mã thất bại do khóa sai.
 
-#### [NEW] [logger.config.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/config/logger.config.ts)
-- Viết cấu hình Winston định dạng log động theo `NODE_ENV`:
-  * Môi trường phát triển: Dùng `winston.format.combine(winston.format.colorize(), winston.format.simple())`.
-  * Môi trường production: Dùng `winston.format.combine(winston.format.timestamp(), winston.format.json())`.
-
-#### [MODIFY] [main.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/main.ts)
-- Thay thế Logger mặc định bằng Winston Logger khi tạo ứng dụng:
+#### [MODIFY] [patient.entity.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/models/patient.entity.ts)
+- Cấu hình transformer cho cột `phone` và `address`:
   ```typescript
-  const app = await NestFactory.create(AppModule, {
-    logger: WinstonModule.createLogger(winstonLoggerOptions),
-  });
+  @Column({ nullable: true, transformer: new EncryptionTransformer() })
+  phone: string;
+
+  @Column({ nullable: true, transformer: new EncryptionTransformer() })
+  address: string;
+  ```
+
+#### [MODIFY] [medical-record.entity.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/models/medical-record.entity.ts)
+- Cấu hình transformer cho cột `symptoms`, `diagnosis`, `treatment`:
+  ```typescript
+  @Column({ type: 'text', nullable: true, transformer: new EncryptionTransformer() })
+  symptoms: string;
+
+  @Column({ type: 'text', nullable: true, transformer: new EncryptionTransformer() })
+  diagnosis: string;
+
+  @Column({ type: 'text', nullable: true, transformer: new EncryptionTransformer() })
+  treatment: string;
   ```
 
 ---
@@ -39,12 +51,13 @@ Trong môi trường sản phẩm (production), việc ghi nhật ký bằng `co
 ## Verification Plan
 
 ### Automated Tests
-- Kiểm tra tính tương thích và đảm bảo các unit/E2E test pass bình thường:
+- Kiểm tra tính tương thích dữ liệu và đảm bảo tất cả kiểm thử E2E / Unit tests chạy bình thường:
   `npm run test`
   `npm run test:e2e`
 
 ### Manual Verification
-1. Chạy backend với `NODE_ENV=development` và quan sát định dạng log trong terminal (phải có màu sắc, định dạng dễ đọc).
-2. Chạy thử backend giả lập production: Thêm `NODE_ENV=production` vào `.env` và khởi động lại.
-3. Xác nhận tất cả log hệ thống hiển thị dưới dạng JSON một dòng, ví dụ:
-   `{"level":"info","message":"Nest application successfully started","timestamp":"2026-06-29T16:04:00.000Z","context":"NestApplication"}`
+1. Đăng ký khóa `ENCRYPTION_KEY=my_super_secret_key_123456789012` trong `.env`.
+2. Tạo mới một bệnh nhân và tạo một bệnh án thông qua giao diện Next.js hoặc E2E test.
+3. Dùng một trình quản lý cơ sở dữ liệu SQLite hoặc câu lệnh truy vấn SQLite thô để kiểm tra trực tiếp tệp `medicare.sqlite`:
+   * Xác nhận dữ liệu trong bảng `patients` cột `phone`, `address` và bảng `medical_records` cột `diagnosis`, `symptoms` đã bị mã hóa thành dạng hex (ví dụ: `4f7d...:e2ba...`).
+4. Kiểm tra lại trên giao diện web: Xác nhận thông tin hiển thị lên UI vẫn đầy đủ nội dung giải mã (đọc bình thường).

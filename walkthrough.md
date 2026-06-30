@@ -218,3 +218,34 @@ Visual verification screenshots:
 - **Class-Validator Config Schema**: Created `EnvironmentVariables` class containing data constraints (such as `PORT` must be a positive integer, `DB_TYPE` must be sqlite or postgres, etc.) using `class-validator` decorators.
 - **Boot-time validation**: Integrated validation function inside NestJS `ConfigModule.forRoot` in `DatabaseModule`, intercepting startup config loading.
 - **Installer warnings block**: Implemented formatted console message box listing each invalid variable, its constraint rules, and step-by-step fix guides in Vietnamese, exiting cleanly with `process.exit(1)` to prevent runtime crashes.
+
+---
+
+### 13. Transparent AES-256 Encryption at Rest (Sensitive Data)
+
+**Goal**: Protect sensitive patient clinical data and personal contact info stored in the SQLite/PostgreSQL database from exposure in case of physical database access.
+
+#### Files Changed
+- **[NEW] [encryption.transformer.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/database/transformers/encryption.transformer.ts)**: TypeORM `ValueTransformer` implementing AES-256-CBC transparent encrypt/decrypt using Node.js built-in `crypto` module.
+- **[MODIFY] [patient.entity.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/models/patient.entity.ts)**: Applied `EncryptionTransformer` on `phone` and `address` columns.
+- **[MODIFY] [medical-record.entity.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/src/models/medical-record.entity.ts)**: Applied `EncryptionTransformer` on `symptoms`, `diagnosis`, and `treatment` columns.
+- **[MODIFY] [.env](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/.env) / [.env.example](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/backend/.env.example)**: Added `ENCRYPTION_KEY` variable with documentation comment.
+
+#### Implementation Details
+- **Key derivation**: Used `crypto.scryptSync(secret, 'medicare-salt', 32)` to derive a stable 32-byte AES key from any-length string `ENCRYPTION_KEY` environment variable (avoids key length constraints).
+- **Format**: Each encrypted value stored as `<16-byte-iv-hex>:<ciphertext-hex>`, e.g. `f71562567d4d7408fabb9eda756c9756:beecdbc874dfd0459c10fbd2d4c73be0`.
+- **Graceful fallback**: `from()` method returns the raw stored value if decryption fails (e.g. wrong key or legacy unencrypted data) — preventing application crash during key rotation.
+- **Transparent**: All services (`PatientService`, `ClinicalService`) and the frontend receive/send plain text strings with zero code changes needed outside the entity layer.
+
+#### Verification Results
+| Check | Result |
+|---|---|
+| Unit tests (`npm run test`) | ✅ 30/30 passed |
+| E2E tests (`npm run test:e2e`) | ✅ 8/8 passed |
+| Raw SQLite `phone` column | ✅ `iv:hex` format confirmed |
+| Raw SQLite `address` column | ✅ `iv:hex` format confirmed |
+| Raw SQLite `symptoms` column | ✅ `iv:hex` format confirmed |
+| Raw SQLite `diagnosis` column | ✅ `iv:hex` format confirmed |
+| Raw SQLite `treatment` column | ✅ `iv:hex` format confirmed |
+| API `/api/v1/patients` response | ✅ Returns plain text `+84901111111`, `Hà Nội` |
+

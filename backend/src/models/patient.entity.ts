@@ -14,6 +14,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { EncryptionTransformer } from '../database/transformers/encryption.transformer';
 
 @Entity('patients')
 export class Patient {
@@ -39,10 +40,10 @@ export class Patient {
   @Column({ type: 'varchar', length: 10 })
   gender: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'text', nullable: true, transformer: new EncryptionTransformer() })
   phone: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, transformer: new EncryptionTransformer() })
   address: string | null;
 
   @Column({ type: 'varchar', length: 5, nullable: true })
