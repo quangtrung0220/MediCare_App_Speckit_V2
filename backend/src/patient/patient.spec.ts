@@ -2,6 +2,11 @@ import { Test } from '@nestjs/testing';
 import { PatientController } from '../controllers/patient.controller';
 import { PatientService } from '../services/patient.service';
 import { Patient } from '../models/patient.entity';
+import { Appointment } from '../models/appointment.entity';
+import { MedicalRecord } from '../models/medical-record.entity';
+import { Prescription } from '../models/prescription.entity';
+import { Payment } from '../models/payment.entity';
+import { AuditLog } from '../models/audit-log.entity';
 import { PATIENT_REPOSITORY } from '../services/contracts';
 import { PatientRepository } from '../services/repositories/patient.repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -20,8 +25,24 @@ describe('Patient System Unit Tests', () => {
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
+        restore: jest.fn(),
+        hardDelete: jest.fn(),
         search: jest.fn(),
         count: jest.fn(),
+      };
+
+      const emptyRepo = {
+        find: jest.fn().mockResolvedValue([]),
+        findOne: jest.fn().mockResolvedValue(null),
+        findOneBy: jest.fn().mockResolvedValue(null),
+        save: jest.fn().mockResolvedValue({}),
+        create: jest.fn().mockReturnValue({}),
+        delete: jest.fn().mockResolvedValue({ affected: 1 }),
+        createQueryBuilder: jest.fn().mockReturnValue({
+          leftJoinAndSelect: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          getMany: jest.fn().mockResolvedValue([]),
+        }),
       };
 
       const module = await Test.createTestingModule({
@@ -29,6 +50,11 @@ describe('Patient System Unit Tests', () => {
         providers: [
           PatientService,
           { provide: PATIENT_REPOSITORY, useValue: mockRepo },
+          { provide: getRepositoryToken(Appointment), useValue: emptyRepo },
+          { provide: getRepositoryToken(MedicalRecord), useValue: emptyRepo },
+          { provide: getRepositoryToken(Prescription), useValue: emptyRepo },
+          { provide: getRepositoryToken(Payment), useValue: emptyRepo },
+          { provide: getRepositoryToken(AuditLog), useValue: emptyRepo },
         ],
       }).compile();
 

@@ -72,4 +72,13 @@ export class PatientRepository implements IPatientRepository {
       take: 20,
     });
   }
+
+  /**
+   * Physical (hard) delete — permanently removes the record from the database.
+   * TypeORM withDeleted() is not needed here; the entity CASCADE handles children.
+   */
+  async hardDelete(id: string): Promise<void> {
+    await this.repo.delete(id);
+  }
 }
+

@@ -15,5 +15,6 @@ export interface IBaseRepository<T> {
   update(id: string, data: Partial<T>): Promise<T | null>;
   delete(id: string): Promise<boolean>;
   restore?(id: string): Promise<boolean>;
+  hardDelete?(id: string): Promise<void>;
   count(): Promise<number>;
 }
