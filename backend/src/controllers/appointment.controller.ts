@@ -15,13 +15,18 @@ import {
   Patch,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard, Roles } from '../guards/roles.guard';
 import { AppointmentService } from '../services/appointment.service';
 import { Appointment } from '../models/appointment.entity';
 import { CreateAppointmentDto } from '../appointment/dto/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointment/dto/update-appointment.dto';
 
 @Controller('appointments')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN', 'DOCTOR', 'NURSE', 'RECEPTIONIST', 'PATIENT')
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
 
@@ -81,6 +86,7 @@ export class AppointmentController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles('ADMIN')
   async delete(@Param('id') id: string): Promise<void> {
     return this.appointmentService.delete(id);
   }

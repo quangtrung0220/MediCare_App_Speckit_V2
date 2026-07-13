@@ -1,20 +1,24 @@
 /*
  * Created: 2026-06-24
  * Purpose: Appointment business service layer with conflict detection (T029).
+ * Updated: 2026-07-03 — Added real-time SSE notification hooks (T068).
  * Owner: Quang Trung
  */
-import { Injectable, Inject, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ConflictException, Optional } from '@nestjs/common';
 import { APPOINTMENT_REPOSITORY } from './contracts';
 import type { IAppointmentRepository } from './contracts';
 import { Appointment } from '../models/appointment.entity';
 import { CreateAppointmentDto } from '../appointment/dto/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointment/dto/update-appointment.dto';
+import { NotificationService } from '../notifications/notification.service';
 
 @Injectable()
 export class AppointmentService {
   constructor(
     @Inject(APPOINTMENT_REPOSITORY)
     private readonly appointmentRepo: IAppointmentRepository,
+    @Optional()
+    private readonly notificationService?: NotificationService,
   ) {}
 
   async findAll(options?: { skip?: number; take?: number }): Promise<Appointment[]> {
@@ -40,12 +44,37 @@ export class AppointmentService {
         throw new ConflictException('Time slot is already booked');
       }
     }
-    return this.appointmentRepo.create(data);
+    const created = await this.appointmentRepo.create(data);
+
+    // 🔔 Notify receptionist and doctors of a new booking
+    this.notificationService?.emit({
+      event: 'appointment.new',
+      title: 'Lịch hẹn mới',
+      message: `Lịch hẹn ngày ${data.appointmentDate} lúc ${data.appointmentTime ?? '?'} vừa được đặt.`,
+      severity: 'info',
+      targetRoles: ['DOCTOR', 'RECEPTIONIST'],
+      meta: { appointmentId: created.id, doctorId: data.doctorId },
+    });
+
+    return created;
   }
 
   async update(id: string, data: UpdateAppointmentDto): Promise<Appointment> {
     const updated = await this.appointmentRepo.update(id, data);
     if (!updated) throw new NotFoundException(`Appointment ${id} not found`);
+
+    // 🔔 Notify doctor when patient checks in
+    if (data.status === 'CHECKED_IN') {
+      this.notificationService?.emit({
+        event: 'appointment.checked_in',
+        title: 'Bệnh nhân đã đến',
+        message: `Bệnh nhân của lịch hẹn #${id.slice(0, 8)} đã check-in, sẵn sàng khám.`,
+        severity: 'warning',
+        targetRoles: ['DOCTOR', 'NURSE'],
+        meta: { appointmentId: id },
+      });
+    }
+
     return updated;
   }
 

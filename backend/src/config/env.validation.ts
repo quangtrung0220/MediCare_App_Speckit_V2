@@ -28,6 +28,13 @@ class EnvironmentVariables {
   @IsNumber({}, { message: 'THROTTLE_LIMIT phải là số nguyên (lượt gọi tối đa)' })
   @IsOptional()
   THROTTLE_LIMIT?: number;
+
+  @IsString({ message: 'JWT_SECRET phải là chuỗi bí mật cho JWT (tối thiểu 32 ký tự)' })
+  JWT_SECRET: string;
+
+  @IsString({ message: 'JWT_EXPIRES_IN phải là chuỗi thời gian hết hạn (ví dụ: 8h, 1d)' })
+  @IsOptional()
+  JWT_EXPIRES_IN?: string;
 }
 
 export function validate(config: Record<string, any>) {

@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { HealthService } from './health.service';
 import { HealthResponseDto } from './dto/health-response.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 /**
  * HealthController
@@ -17,12 +18,14 @@ export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
   /** GET /health — liveness probe */
+  @Public()
   @Get()
   check(): HealthResponseDto {
     return this.healthService.check();
   }
 
   /** GET /health/ready — readiness probe */
+  @Public()
   @Get('ready')
   ready(): HealthResponseDto {
     return this.healthService.ready();

@@ -10,9 +10,10 @@ import { AppointmentController } from '../controllers/appointment.controller';
 import { AppointmentService } from '../services/appointment.service';
 import { AppointmentRepository } from '../services/repositories/appointment.repository';
 import { APPOINTMENT_REPOSITORY } from '../services/contracts';
+import { NotificationModule } from '../notifications/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Appointment])],
+  imports: [TypeOrmModule.forFeature([Appointment]), NotificationModule],
   controllers: [AppointmentController],
   providers: [
     AppointmentService,

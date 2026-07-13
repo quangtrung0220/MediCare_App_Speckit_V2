@@ -3,7 +3,7 @@
  * Purpose: Business service layer for clinical encounters, EMR records, and prescriptions (T002, T003).
  * Owner: Antigravity
  */
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { MedicalRecord } from '../models/medical-record.entity';
@@ -11,6 +11,7 @@ import { Prescription } from '../models/prescription.entity';
 import { PrescriptionItem } from '../models/prescription-item.entity';
 import { InventoryItem } from '../models/inventory-item.entity';
 import { Appointment } from '../models/appointment.entity';
+import { NotificationService } from '../notifications/notification.service';
 
 @Injectable()
 export class ClinicalService {
@@ -26,6 +27,8 @@ export class ClinicalService {
     @InjectRepository(Appointment)
     private readonly appointmentRepo: Repository<Appointment>,
     private readonly dataSource: DataSource,
+    @Optional()
+    private readonly notificationService?: NotificationService,
   ) {}
 
   async createMedicalRecord(data: Partial<MedicalRecord>): Promise<MedicalRecord> {
@@ -92,10 +95,22 @@ export class ClinicalService {
         await manager.save(PrescriptionItem, rxItem);
       }
 
-      return manager.findOne(Prescription, {
+      const rx = await manager.findOne(Prescription, {
         where: { id: savedRx.id },
         relations: { items: true },
-      }) as Promise<Prescription>;
+      });
+
+      // 🔔 Notify pharmacist a new prescription needs dispensing
+      this.notificationService?.emit({
+        event: 'prescription.ready',
+        title: 'Đơn thuốc mới cần cấp phát',
+        message: `Đơn thuốc #${savedRx.id.slice(0, 8)} vừa được tạo, ${itemsData.length} loại thuốc cần chuẩn bị.`,
+        severity: 'warning',
+        targetRoles: ['PHARMACIST'],
+        meta: { prescriptionId: savedRx.id },
+      });
+
+      return rx as Prescription;
     });
   }
 
@@ -125,6 +140,19 @@ export class ClinicalService {
           const currentQty = item.inventoryItem.quantity;
           const newQty = Math.max(0, currentQty - item.quantity);
           await manager.update(InventoryItem, item.inventoryItemId, { quantity: newQty });
+
+          // 🔔 Alert if new quantity dropped below minimum threshold
+          const minQty = item.inventoryItem.minQuantity ?? 0;
+          if (newQty <= minQty && currentQty > minQty) {
+            this.notificationService?.emit({
+              event: 'inventory.low_stock',
+              title: '⚠️ Tồn kho thấp',
+              message: `${item.inventoryItem.name} còn ${newQty} ${item.inventoryItem.unit} (ngưỡng tối thiểu: ${minQty}).`,
+              severity: 'critical',
+              targetRoles: ['PHARMACIST', 'ADMIN'],
+              meta: { inventoryItemId: item.inventoryItemId, currentQty: newQty, minQty },
+            });
+          }
         }
       }
 

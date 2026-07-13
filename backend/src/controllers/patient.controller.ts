@@ -16,14 +16,19 @@ import {
   Res,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard, Roles } from '../guards/roles.guard';
 import { PatientService } from '../services/patient.service';
 import { Patient } from '../models/patient.entity';
 import { CreatePatientDto } from '../patient/dto/create-patient.dto';
 import { UpdatePatientDto } from '../patient/dto/update-patient.dto';
 
 @Controller('patients')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN', 'DOCTOR', 'NURSE', 'RECEPTIONIST')
 export class PatientController {
   constructor(private readonly patientService: PatientService) {}
 
@@ -100,9 +105,11 @@ export class PatientController {
    * Permanently hard-delete all patient data (GDPR right-to-erasure).
    * DELETE /api/v1/patients/:id/purge
    * Returns 409 Conflict if patient has unpaid invoices.
+   * Restricted to ADMIN only.
    */
   @Delete(':id/purge')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles('ADMIN')
   async purge(@Param('id') id: string): Promise<void> {
     return this.patientService.purgePatient(id);
   }

@@ -3,12 +3,16 @@
  * Purpose: Billing REST controller exposing endpoints for payment and invoicing (T005).
  * Owner: Antigravity
  */
-import { Controller, Get, Post, Patch, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard, Roles } from '../guards/roles.guard';
 import { BillingService } from '../services/billing.service';
 import { Payment } from '../models/payment.entity';
 import type { PaymentMethod } from '../models/payment.entity';
 
 @Controller('payments')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN', 'RECEPTIONIST')
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
