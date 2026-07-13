@@ -96,8 +96,28 @@ Tài liệu này mô tả chi tiết tính năng, luồng hoạt động (workfl
 
 ### Phân hệ 9: Quản trị, Thiết lập & Bảo mật
 
-1. **Trang quản trị tài khoản (Admin Panel)**: Phê duyệt tài khoản nhân viên mới đăng ký, khóa/mở hoạt động của người dùng hệ thống.
-2. **Nhật ký hệ thống (Audit Logs)**: Ghi nhận thời gian, danh tính người dùng và hành động tác động tới dữ liệu bệnh nhân để phục vụ mục đích kiểm toán bảo mật thông tin y tế.
-3. **Bảo mật dữ liệu cá nhân (Data Privacy)**: Hỗ trợ quyền tự quyết dữ liệu của bệnh nhân theo chuẩn bảo mật y tế:
+1. **Bảo mật và Phân quyền (JWT & Role-Based Access Control - RBAC)**:
+   * **Cơ chế xác thực**: Sử dụng mã token JWT (JSON Web Token) đính kèm trong tiêu đề yêu cầu `Authorization: Bearer <token>` để bảo vệ toàn bộ các đầu API.
+   * **Phân quyền truy cập (RBAC)**: Phân chia chi tiết 6 vai trò người dùng hệ thống:
+     * `ADMIN`: Quản trị toàn hệ thống, phê duyệt nhân viên, mở/khóa tài khoản, xem audit logs.
+     * `DOCTOR`: Quản lý ca khám lâm sàng, kết luận chẩn đoán, kê đơn thuốc.
+     * `NURSE`: Tiếp nhận đo chỉ số sinh hiệu cho bệnh nhân.
+     * `RECEPTIONIST`: Đặt lịch hẹn trực tiếp, check-in bệnh nhân hôm nay.
+     * `PHARMACIST`: Cấp phát đơn thuốc lâm sàng, theo dõi kho dược phẩm.
+     * `PATIENT`: Cổng thông tin tự đặt lịch khám, xem lịch hẹn cá nhân và quản lý bảo mật dữ liệu.
+   * **Đăng ký an toàn**: Tài khoản đăng ký mới tự động rơi vào trạng thái Chờ duyệt (`isPendingApproval: true`). Cần có quản trị viên phê duyệt trên Admin Panel mới có thể đăng nhập.
+2. **Trang quản trị tài khoản (Admin Panel)**: Phê duyệt tài khoản nhân viên mới đăng ký, khóa/mở hoạt động của người dùng hệ thống.
+3. **Thông báo thời gian thực (Real-time Notifications via SSE)**:
+   * **Kiến trúc đẩy (Push-based)**: Tận dụng kết nối liên tục Server-Sent Events (SSE) qua cổng `/api/v1/notifications/stream?token=<jwt>` để đẩy sự kiện tức thì từ máy chủ xuống các vai trò liên quan mà không cần thăm dò liên tục (polling).
+   * **Các sự kiện thời gian thực**:
+     * `appointment.new` (Lịch hẹn mới): Tự động đẩy báo hiệu tới `RECEPTIONIST` và `DOCTOR` phụ trách.
+     * `appointment.checked_in` (Bệnh nhân đã đến): Đẩy tin tới `DOCTOR` và `NURSE` báo hiệu bệnh nhân sẵn sàng đo sinh hiệu/khám lâm sàng.
+     * `prescription.ready` (Đơn thuốc chờ cấp phát): Báo hiệu tới `PHARMACIST` chuẩn bị thuốc ngay khi bác sĩ kê đơn xong.
+     * `inventory.low_stock` (⚠️ Tồn kho thấp): Đẩy cảnh báo tới `PHARMACIST` và `ADMIN` khi một loại thuốc rơi xuống dưới ngưỡng quy định (`minQuantity`).
+     * `user.pending_approval` (Đăng ký tài khoản mới): Báo hiệu tức thì tới `ADMIN` để vào phê duyệt nhân viên mới.
+   * **Giao diện nhận diện**: Chuông thông báo 🔔 động tích hợp trên thanh đầu trang (AppShell header), hiển thị chấm trạng thái kết nối SSE, huy hiệu số lượng tin chưa đọc nhấp nháy tự động và thanh trượt danh sách thông báo phân màu theo mức độ cảnh báo (info, warning, critical).
+4. **Nhật ký hệ thống (Audit Logs)**: Ghi nhận thời gian, danh tính người dùng và hành động tác động tới dữ liệu bệnh nhân để phục vụ mục đích kiểm toán bảo mật thông tin y tế.
+5. **Bảo mật dữ liệu cá nhân (Data Privacy)**: Hỗ trợ quyền tự quyết dữ liệu của bệnh nhân theo chuẩn bảo mật y tế:
    * Cho phép bệnh nhân xuất và tải về toàn bộ hồ sơ dữ liệu cá nhân dạng tệp `.JSON`.
    * Gửi yêu cầu xóa vĩnh viễn thông tin cá nhân khỏi hệ thống phòng khám.
+

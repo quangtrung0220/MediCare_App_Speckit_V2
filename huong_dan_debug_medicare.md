@@ -168,6 +168,44 @@ Tài liệu này cung cấp các hướng dẫn chẩn đoán lỗi chi tiết v
 
 ---
 
+### 🛠️ Tình huống 6: Lỗi Xác Thực JWT & Phân quyền RBAC (`401 Unauthorized` hoặc `403 Forbidden`)
+* **Triệu chứng**: Giao diện báo lỗi mất quyền truy cập, các cuộc gọi API trả về mã lỗi `401 Unauthorized` hoặc `403 Forbidden`. Hoặc đăng ký tài khoản nhân viên mới xong nhưng không thể đăng nhập.
+* **Nguyên nhân**: 
+  1. Thiếu tiêu đề xác thực `Authorization: Bearer <token>` trong các yêu cầu API được bảo vệ bởi `JwtAuthGuard` toàn cục.
+  2. Vai trò của tài khoản không đủ quyền truy cập (ví dụ: Dược sĩ cố tình truy cập vào API Admin `/admin/*`).
+  3. Tài khoản mới đăng ký đang ở trạng thái chờ quản trị viên phê duyệt (`isPendingApproval` là `true` trong DB).
+* **Cách khắc phục**:
+  1. **Kiểm tra JWT gửi đi**: Đảm bảo các hàm gọi API ở Frontend sử dụng `authHeaders()` từ [auth.service.ts](file:///f:/Study/Trung/SpecKit/MediCare_App%20new/frontend/src/services/auth.service.ts) để tự động điền Bearer token vào Headers.
+  2. **Bỏ qua xác thực cho các route công khai**: Đối với các route như trang đăng nhập, đăng ký, hoặc kiểm tra health check, đảm bảo đã đánh dấu decorator `@Public()` ở controller phía Backend.
+  3. **Phê duyệt tài khoản**: Sử dụng tài khoản `admin@medicare.vn` (mật khẩu mặc định `Medicare@2026`) truy cập vào trang Admin Panel để phê duyệt tài khoản mới (`isPendingApproval: false`).
+
+---
+
+### 🛠️ Tình huống 7: Lỗi Mất Kết Nối Chuông Thông Báo Real-time (SSE Connection Failed)
+* **Triệu chứng**: Chấm tròn trạng thái trên chuông thông báo 🔔 có màu xám hoặc đỏ (Offline). Không nhận được thông báo mới khi có ca check-in hoặc khi kê đơn thuốc. Console báo lỗi:
+  ```text
+  EventSource's response has a MIME type ("application/json") that is not "text/event-stream". Connection aborted.
+  ```
+* **Nguyên nhân**: 
+  1. Trình duyệt tự ngắt kết nối do Bearer token truyền vào query param `?token=` bị sai, hết hạn, hoặc trống khiến backend trả về lỗi JSON `401 Unauthorized` thay vì luồng stream.
+  2. Kết nối mạng chập chờn hoặc backend NestJS bị lỗi deadlock tiến trình.
+* **Cách khắc phục**:
+  1. **Xác thực JWT trong SSE**: Trình duyệt `EventSource` không hỗ trợ gửi tiêu đề HTTP Header tùy chỉnh, do đó bắt buộc phải truyền token qua Query Parameter:
+     `new EventSource('/api/v1/notifications/stream?token=' + token)`
+     Đảm bảo token được lấy chính xác từ `localStorage` trước khi khởi tạo kết nối.
+  2. **Kiểm tra đầu dây nhận phía Backend**: Đảm bảo route `/notifications/stream` đã được mở công khai bằng `@Public()` để tránh bị `JwtAuthGuard` toàn cục chặn trước khi đọc query token:
+     ```typescript
+     // notification.controller.ts
+     @Public()
+     @Sse('stream')
+     stream(@Query('token') token: string, ...) {
+        // Tự giải mã và kiểm tra jwt ở đây
+     }
+     ```
+  3. **Kiểm tra số lượng kết nối đang hoạt động**: Gửi yêu cầu HTTP GET đến cổng `/api/v1/notifications/health` để xem số lượng kết nối SSE đang mở trong bộ nhớ máy chủ nhằm phát hiện rò rỉ kết nối (connection leak).
+
+---
+
 ## 4. Các Lệnh Tiện Ích Phục Vụ Debug Nhanh
 
 * **Chạy kiểm thử frontend**:
@@ -178,3 +216,4 @@ Tài liệu này cung cấp các hướng dẫn chẩn đoán lỗi chi tiết v
      `Remove-Item medicare.sqlite -ErrorAction SilentlyContinue; npx ts-node src/database/seeders/seed.ts`
   3. Khởi động lại NestJS backend:
      `npm run start` (hoặc `npm run start:dev`).
+
