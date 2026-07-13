@@ -32,17 +32,20 @@ async function seed() {
   const inventoryRepo = ds.getRepository(InventoryItem);
 
   // --- Users ---
+  // Default password for all seeded accounts: Medicare@2026
+  // Hash generated with bcrypt rounds=12
+  const defaultHash = '$2b$12$CaTahR5AEkglOxcYgD4sCekeKrhRWkKPccjr8bQ0BhppHlYWPJZTu';
   const users = await userRepo.save([
-    { email: 'admin@medicare.vn', passwordHash: '$placeholder_hash', role: 'ADMIN' as const, isActive: true },
-    { email: 'doctor.minh@medicare.vn', passwordHash: '$placeholder_hash', role: 'DOCTOR' as const, isActive: true },
-    { email: 'doctor.huong@medicare.vn', passwordHash: '$placeholder_hash', role: 'DOCTOR' as const, isActive: true },
-    { email: 'nurse.mai@medicare.vn', passwordHash: '$placeholder_hash', role: 'NURSE' as const, isActive: true },
-    { email: 'receptionist.hoa@medicare.vn', passwordHash: '$placeholder_hash', role: 'RECEPTIONIST' as const, isActive: true },
-    { email: 'pharmacist.tuan@medicare.vn', passwordHash: '$placeholder_hash', role: 'PHARMACIST' as const, isActive: true },
-    { email: 'patient.an@medicare.vn', passwordHash: '$placeholder_hash', role: 'PATIENT' as const, isActive: true },
-    { email: 'patient.binh@medicare.vn', passwordHash: '$placeholder_hash', role: 'PATIENT' as const, isActive: true },
+    { email: 'admin@medicare.vn', passwordHash: defaultHash, role: 'ADMIN' as const, isActive: true, isPendingApproval: false },
+    { email: 'doctor.minh@medicare.vn', passwordHash: defaultHash, role: 'DOCTOR' as const, isActive: true, isPendingApproval: false },
+    { email: 'doctor.huong@medicare.vn', passwordHash: defaultHash, role: 'DOCTOR' as const, isActive: true, isPendingApproval: false },
+    { email: 'nurse.mai@medicare.vn', passwordHash: defaultHash, role: 'NURSE' as const, isActive: true, isPendingApproval: false },
+    { email: 'receptionist.hoa@medicare.vn', passwordHash: defaultHash, role: 'RECEPTIONIST' as const, isActive: true, isPendingApproval: false },
+    { email: 'pharmacist.tuan@medicare.vn', passwordHash: defaultHash, role: 'PHARMACIST' as const, isActive: true, isPendingApproval: false },
+    { email: 'patient.an@medicare.vn', passwordHash: defaultHash, role: 'PATIENT' as const, isActive: true, isPendingApproval: false },
+    { email: 'patient.binh@medicare.vn', passwordHash: defaultHash, role: 'PATIENT' as const, isActive: true, isPendingApproval: false },
   ]);
-  console.log(`✅ Seeded ${users.length} users`);
+  console.log(`✅ Seeded ${users.length} users (password: Medicare@2026)`);
 
   // --- Doctors ---
   const doctorUser1 = users.find(u => u.email === 'doctor.minh@medicare.vn')!;

@@ -4,7 +4,9 @@
  * Owner: Quang Trung
  */
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { join } from 'path';
+import { join, resolve, dirname } from 'path';
+import { homedir } from 'os';
+import * as fs from 'fs';
 
 /**
  * Builds a TypeORM DataSourceOptions based on environment variables.
@@ -37,9 +39,22 @@ export function buildDataSourceOptions(): DataSourceOptions {
   }
 
   // Default: SQLite for local development
+  let dbDatabase = process.env.DB_DATABASE ?? join(process.cwd(), 'medicare.sqlite');
+  if (!isTest) {
+    if (dbDatabase.startsWith('~')) {
+      dbDatabase = join(homedir(), dbDatabase.slice(1));
+    } else {
+      dbDatabase = resolve(dbDatabase);
+    }
+    const dbDir = dirname(dbDatabase);
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+  }
+
   return {
     type: 'better-sqlite3',
-    database: isTest ? ':memory:' : (process.env.DB_DATABASE ?? join(process.cwd(), 'medicare.sqlite')),
+    database: isTest ? ':memory:' : dbDatabase,
     ...commonOptions,
   };
 }
