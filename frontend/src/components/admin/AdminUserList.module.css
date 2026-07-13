@@ -1,0 +1,196 @@
+/* AdminUserList styles */
+.container {
+  padding: 24px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 28px;
+}
+
+.section {
+  margin-bottom: 28px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: white;
+  padding: 0 6px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 8px;
+  transition: background 0.2s;
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.rowPending {
+  border-color: rgba(245, 158, 11, 0.25);
+  background: rgba(245, 158, 11, 0.04);
+}
+
+.rowBlocked {
+  border-color: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.03);
+  opacity: 0.75;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.email {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin: 0 0 5px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.roleChip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  letter-spacing: 0.5px;
+}
+
+.metaText {
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.approveBtn,
+.rejectBtn,
+.blockBtn,
+.unblockBtn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.approveBtn {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.approveBtn:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.rejectBtn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.rejectBtn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.blockBtn {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.blockBtn:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.unblockBtn {
+  background: rgba(99, 102, 241, 0.1);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.unblockBtn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.approveBtn:disabled,
+.rejectBtn:disabled,
+.blockBtn:disabled,
+.unblockBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.loading,
+.error {
+  padding: 40px;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.error {
+  color: #f87171;
+}
