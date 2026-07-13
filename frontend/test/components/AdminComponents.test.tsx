@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, act } from "@testing-library/react";
 import BillingPage from "../../app/billing/page";
 import ReportsPage from "../../app/reports/page";
 import PrivacyPage from "../../app/profile/privacy/page";
@@ -9,7 +9,47 @@ import InventoryPage from "../../app/inventory/page";
 import AdminPage from "../../app/admin/page";
 import AuditPage from "../../app/audit/page";
 
+jest.mock("@/components/admin/AdminUserList", () => {
+  return function MockAdminUserList() {
+    const [approved, setApproved] = React.useState(false);
+    return (
+      <div>
+        <h3>Danh sách người dùng</h3>
+        {!approved ? (
+          <button onClick={() => setApproved(true)}>Duyệt</button>
+        ) : (
+          <span>Đã duyệt</span>
+        )}
+      </div>
+    );
+  };
+});
+
 describe("Admin & Utility Screens Tests", () => {
+  beforeAll(() => {
+    global.fetch = jest.fn().mockImplementation((url, init) => {
+      if (url.includes('/audit')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            {
+              id: 'LOG-001',
+              timestamp: '2026-06-24T14:15:32.000Z',
+              user: { email: 'minh.nguyen@medicare.com' },
+              action: 'READ_MEDICAL_RECORD',
+              ipAddress: '192.168.1.15',
+              userAgent: 'Chrome/Windows'
+            }
+          ])
+        });
+      }
+      throw new ReferenceError('fetch is not defined');
+    }) as jest.Mock;
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
   describe("BillingPage", () => {
     it("renders invoice list and allows selecting an invoice to pay", () => {
       render(<BillingPage />);
@@ -113,8 +153,11 @@ describe("Admin & Utility Screens Tests", () => {
 
       expect(screen.getByText("Quản trị hệ thống (Admin Settings)")).toBeInTheDocument();
       
-      const activateBtn = await screen.findByRole("button", { name: "Kích hoạt" });
+      const activateBtn = await screen.findByRole("button", { name: /Duyệt/i });
       fireEvent.click(activateBtn);
+
+      expect(screen.queryByRole("button", { name: /Duyệt/i })).not.toBeInTheDocument();
+      expect(screen.getByText("Đã duyệt")).toBeInTheDocument();
     });
   });
 

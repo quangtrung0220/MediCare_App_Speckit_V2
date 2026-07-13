@@ -6,9 +6,32 @@ import { SidebarNav } from "@/components/layout/SidebarNav";
 // Mock next/navigation
 jest.mock("next/navigation", () => ({
   usePathname: () => "/book-appointment",
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+}));
+
+// Mock auth.service for RBAC-filtered sidebar navigation links
+jest.mock("../../src/services/auth.service", () => ({
+  getUser: () => ({ id: "USR-001", email: "patient@medicare.com", role: "PATIENT" }),
+  isAuthenticated: () => true,
+  getToken: () => "mock-token",
 }));
 
 describe("AppShell and SidebarNav", () => {
+  beforeAll(() => {
+    global.EventSource = jest.fn().mockImplementation(() => ({
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      close: jest.fn(),
+    })) as any;
+  });
+
+  afterAll(() => {
+    delete (global as any).EventSource;
+  });
   it("renders the sidebar and main workspace header with children", () => {
     render(
       <AppShell>

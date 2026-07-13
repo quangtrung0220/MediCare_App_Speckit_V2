@@ -6,11 +6,14 @@ import { AppModule } from './../src/app.module';
 import { Repository, DataSource } from 'typeorm';
 import { Doctor } from '../src/models/doctor.entity';
 import { Patient } from '../src/models/patient.entity';
+import { User } from '../src/models/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 describe('MediCare End-to-End API integration', () => {
   let app: INestApplication<App>;
   let doctorId: string;
   let patientId: string;
+  let token: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -26,6 +29,24 @@ describe('MediCare End-to-End API integration', () => {
 
     const doctorRepo = dataSource.getRepository(Doctor);
     const patientRepo = dataSource.getRepository(Patient);
+    const userRepo = dataSource.getRepository(User);
+
+    // Register active Admin user for JWT guard bypass
+    const adminUser = await userRepo.save({
+      id: 'USR-ADMIN-E2E',
+      email: 'admin@medicare.com',
+      passwordHash: '$2a$10$dummyhashvalforpasswordsinvalidation',
+      role: 'ADMIN',
+      isActive: true,
+      isPendingApproval: false,
+    });
+
+    const jwtService = app.get(JwtService);
+    token = jwtService.sign({
+      sub: adminUser.id,
+      email: adminUser.email,
+      role: adminUser.role,
+    });
 
     const doctor = await doctorRepo.save({
       firstName: 'Minh',
@@ -58,6 +79,7 @@ describe('MediCare End-to-End API integration', () => {
     it('POST /patients - should create a new patient record', async () => {
       const response = await request(app.getHttpServer())
         .post('/patients')
+        .set('Authorization', `Bearer ${token}`)
         .send({
           firstName: 'Văn B',
           lastName: 'Nguyễn',
@@ -75,6 +97,7 @@ describe('MediCare End-to-End API integration', () => {
     it('GET /patients - should return a list of patients containing the created patient', async () => {
       const response = await request(app.getHttpServer())
         .get('/patients')
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('data');
@@ -88,6 +111,7 @@ describe('MediCare End-to-End API integration', () => {
     it('GET /patients/:id - should retrieve a specific patient', async () => {
       const response = await request(app.getHttpServer())
         .get(`/patients/${createdPatientId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       expect(response.body.firstName).toBe('Văn B');
@@ -96,20 +120,24 @@ describe('MediCare End-to-End API integration', () => {
     it('DELETE /patients/:id - should soft-delete the patient and reject subsequent GETs with 404', async () => {
       await request(app.getHttpServer())
         .delete(`/patients/${createdPatientId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(204);
 
       await request(app.getHttpServer())
         .get(`/patients/${createdPatientId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
 
     it('PATCH /patients/:id/restore - should restore the patient and allow GETs again', async () => {
       await request(app.getHttpServer())
         .patch(`/patients/${createdPatientId}/restore`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       await request(app.getHttpServer())
         .get(`/patients/${createdPatientId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
     });
   });
@@ -119,6 +147,7 @@ describe('MediCare End-to-End API integration', () => {
       const randomDay = String(Math.floor(Math.random() * 25) + 1).padStart(2, '0');
       const response = await request(app.getHttpServer())
         .post('/appointments')
+        .set('Authorization', `Bearer ${token}`)
         .send({
           doctorId,
           patientId,
@@ -139,6 +168,7 @@ describe('MediCare End-to-End API integration', () => {
       // First booking
       await request(app.getHttpServer())
         .post('/appointments')
+        .set('Authorization', `Bearer ${token}`)
         .send({
           doctorId,
           patientId,
@@ -151,6 +181,7 @@ describe('MediCare End-to-End API integration', () => {
       // Conflicting booking
       await request(app.getHttpServer())
         .post('/appointments')
+        .set('Authorization', `Bearer ${token}`)
         .send({
           doctorId,
           patientId,
@@ -159,6 +190,40 @@ describe('MediCare End-to-End API integration', () => {
           status: 'SCHEDULED',
         })
         .expect(409);
+    });
+  });
+
+  describe('Admin Backup & Restore Endpoint (/admin)', () => {
+    it('GET /admin/backup - should download a sqlite backup file or return 400 if in-memory', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/admin/backup')
+        .set('Authorization', `Bearer ${token}`);
+
+      const options = app.get(DataSource).options as any;
+      if (options.database === ':memory:') {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('bộ nhớ');
+      } else {
+        expect(response.status).toBe(200);
+        expect(response.headers['content-type']).toBe('application/x-sqlite3');
+        expect(response.headers['content-disposition']).toContain('attachment; filename=');
+      }
+    });
+
+    it('POST /admin/restore - should upload and restore sqlite database file or return 400 if in-memory', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/admin/restore')
+        .set('Authorization', `Bearer ${token}`)
+        .attach('file', Buffer.from('fake-db-content'), 'medicare_test.sqlite');
+
+      const options = app.get(DataSource).options as any;
+      if (options.database === ':memory:') {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('bộ nhớ');
+      } else {
+        expect(response.status).toBe(201);
+        expect(response.body.message).toContain('thành công');
+      }
     });
   });
 });
