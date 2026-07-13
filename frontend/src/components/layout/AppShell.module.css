@@ -6,8 +6,9 @@
   flex-direction: row;
 }
 
+/* ─── Sidebar ───────────────────────────────────────────────────────────── */
 .sidebar {
-  flex: 0 0 280px;
+  flex: 0 0 260px;
   border-right: 1px solid var(--border);
   background: var(--panel);
   padding: 1rem;
@@ -16,35 +17,77 @@
   height: 100vh;
   overflow-y: auto;
   z-index: 12;
+  display: flex;
+  flex-direction: column;
 }
 
 .brand {
-  font-weight: 700;
-  color: var(--brand);
-  margin-bottom: 1rem;
-}
-
-.main {
-  flex: 1;
-  padding: 1rem 1.2rem;
-  overflow: auto;
-}
-
-.workspaceHeader {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  margin-bottom: 1rem;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--brand);
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.3px;
 }
 
-.workspaceTitle {
+.brandIcon {
+  font-size: 1.3rem;
+}
+
+/* ─── Main content area ─────────────────────────────────────────────────── */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ─── Top header bar ────────────────────────────────────────────────────── */
+.topbar {
+  flex-shrink: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbarTitle {
+  font-size: 0.875rem;
   font-weight: 600;
+  color: var(--text-muted, #64748b);
+  letter-spacing: 0.3px;
 }
 
-.workspaceSubtitle {
-  font-size: 0.9rem;
+.topbarRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+/* ─── Scrollable page content ───────────────────────────────────────────── */
+.main {
+  flex: 1;
+  padding: 1.2rem 1.4rem;
+  overflow-y: auto;
+}
+
+/* ─── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
@@ -55,10 +98,96 @@
     position: relative;
     border-right: none;
     border-bottom: 1px solid var(--border);
-    padding: 1rem;
+    padding: 0.75rem 1rem;
   }
   .brand {
-    margin-bottom: 0.75rem;
-    text-align: center;
+    margin-bottom: 0.5rem;
   }
+}
+
+/* ─── Auth Layout and Sidebar Footer ─────────────────────────────────────── */
+.authContainer {
+  min-height: 100vh;
+  width: 100%;
+}
+
+.navContainer {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.sidebarFooter {
+  flex-shrink: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.userDetails {
+  min-width: 0;
+}
+
+.userEmail {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userRoleBadge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(13, 148, 136, 0.15);
+  color: #14b8a6;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+  border: 1px solid rgba(13, 148, 136, 0.25);
+}
+
+.logoutBtn {
+  width: 100%;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.logoutBtn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.35);
 }

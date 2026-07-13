@@ -3,6 +3,7 @@
  * Purpose: Frontend service for GDPR data privacy actions — export and purge.
  * Owner: Quang Trung
  */
+import { authHeaders } from './auth.service';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
@@ -11,7 +12,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v
  * The browser will prompt a Save dialog via the Content-Disposition header.
  */
 export async function exportPatientData(patientId: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/patients/${patientId}/export`);
+  const res = await fetch(`${API_BASE}/patients/${patientId}/export`, {
+    headers: authHeaders(),
+  });
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
@@ -42,6 +45,7 @@ export async function exportPatientData(patientId: string): Promise<void> {
 export async function purgePatient(patientId: string): Promise<void> {
   const res = await fetch(`${API_BASE}/patients/${patientId}/purge`, {
     method: 'DELETE',
+    headers: authHeaders(),
   });
 
   if (!res.ok) {
